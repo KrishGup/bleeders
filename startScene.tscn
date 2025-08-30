@@ -1,34 +1,69 @@
-[gd_scene load_steps=5 format=3 uid="uid://bhvqqfhfwsian"]
+[gd_scene load_steps=10 format=3 uid="uid://d1mky8khtaj30"]
 
-[ext_resource type="Texture2D" uid="uid://ct5ut7cvn4bli" path="res://icon.svg" id="1_yagjw"]
+[ext_resource type="Texture2D" uid="uid://c21bun6cx7hre" path="res://grass.png" id="1_1ljrl"]
 [ext_resource type="Script" uid="uid://bttnvkhkv4ba4" path="res://character_body_2d.gd" id="2_1ljrl"]
+[ext_resource type="Texture2D" uid="uid://cs77030x4yabj" path="res://stickfig1.png" id="3_3xrhe"]
+[ext_resource type="Texture2D" uid="uid://tmkpmwkb4gsu" path="res://stickfig2.png" id="4_qlfe6"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vj0vq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_3xrhe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_qlfe6")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1ljrl"]
+size = Vector2(58, 653)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_3xrhe"]
-size = Vector2(996, 119)
+size = Vector2(1153.5, 52)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_qlfe6"]
-size = Vector2(109, 105)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vj0vq"]
+size = Vector2(1160.5, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8k52c"]
+size = Vector2(36.25, 650)
 
 [node name="StartScene" type="Node2D"]
 
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 
 [node name="Sprite2D" type="Sprite2D" parent="StaticBody2D"]
-position = Vector2(558, 412)
-scale = Vector2(8.125, 1)
-texture = ExtResource("1_yagjw")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(560, 414)
-shape = SubResource("RectangleShape2D_3xrhe")
+position = Vector2(578.5, 326.5)
+scale = Vector2(1.00608, 1.00772)
+texture = ExtResource("1_1ljrl")
 
 [node name="CharacterBody2D" type="CharacterBody2D" parent="."]
 script = ExtResource("2_1ljrl")
 
-[node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D"]
-position = Vector2(314, 157)
-texture = ExtResource("1_yagjw")
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="CharacterBody2D"]
+position = Vector2(147, 134)
+sprite_frames = SubResource("SpriteFrames_vj0vq")
+frame_progress = 0.447254
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
-position = Vector2(314.5, 158.5)
-shape = SubResource("RectangleShape2D_qlfe6")
+
+[node name="border" type="StaticBody2D" parent="."]
+
+[node name="borderCollision" type="CollisionShape2D" parent="border"]
+position = Vector2(-31, 324.5)
+shape = SubResource("RectangleShape2D_1ljrl")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="border"]
+position = Vector2(575, -25)
+shape = SubResource("RectangleShape2D_3xrhe")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="border"]
+position = Vector2(577.75, 668)
+shape = SubResource("RectangleShape2D_vj0vq")
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="border"]
+position = Vector2(1170, 324)
+shape = SubResource("RectangleShape2D_8k52c")

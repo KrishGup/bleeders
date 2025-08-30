@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://dsaudkes6fdkt"]
+[gd_scene load_steps=4 format=3 uid="uid://dsaudkes6fdkt"]
 
 [ext_resource type="Script" uid="uid://fghb2wpog2o" path="res://button.gd" id="1_uubjt"]
+[ext_resource type="AudioStream" uid="uid://dbtkrcthq5t8s" path="res://resources/menu.wav" id="2_5yleq"]
+[ext_resource type="Texture2D" uid="uid://dt6duoavn80p7" path="res://resources/menu.png" id="3_ylpcl"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -13,13 +15,25 @@ grow_vertical = 2
 [node name="Button" type="Button" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.329
-anchor_top = 0.346
-anchor_right = 0.604
-anchor_bottom = 0.593
-offset_left = -0.00802612
-offset_top = -0.208008
-offset_right = 0.191956
-offset_bottom = -0.264038
+anchor_left = 0.45
+anchor_top = 0.455
+anchor_right = 0.725
+anchor_bottom = 0.702
+offset_left = -0.400024
+offset_top = 0.160004
+offset_right = -0.200012
+offset_bottom = 0.103973
 text = "Start Game"
 script = ExtResource("1_uubjt")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_5yleq")
+volume_db = -10.0
+pitch_scale = 0.8
+autoplay = true
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+z_index = -1
+position = Vector2(567, 375)
+scale = Vector2(0.255011, 0.283673)
+texture = ExtResource("3_ylpcl")

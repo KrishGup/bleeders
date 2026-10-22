@@ -1,7 +1,7 @@
 name: Deploy to GitHub Pages
 
-# Publishes the site whenever master changes. In the repository settings,
-# set Pages → Build and deployment → Source to "GitHub Actions" once.
+# Publishes the site whenever master changes. Needs Settings → Pages → Build and
+# deployment → Source set to "GitHub Actions" (a one-time switch).
 on:
   push:
     branches: [master, main]
@@ -27,10 +27,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - id: pages
+        uses: actions/configure-pages@v5
       - name: Build
         run: npm run build
         env:
-          VITE_SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          # The live address (custom domain included) for absolute Open Graph links.
+          VITE_SITE_URL: ${{ steps.pages.outputs.base_url }}/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

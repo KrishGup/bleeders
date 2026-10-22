@@ -4,6 +4,8 @@
 
 # Bleedle
 
+**[▶ Play at krishgup.github.io/bleeders](https://krishgup.github.io/bleeders/)**
+
 **The daily Bleach character guessing game.** Wordle-style daily puzzles in four modes, with over 200 souls from the
 manga, every filler arc, and the films.
 

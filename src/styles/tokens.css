@@ -1,0 +1,132 @@
+/*
+ * Design tokens. Dark ("Hueco Mundo night") is the default; light is
+ * "Seireitei paper". Colour-blind mode swaps the verdict palette for the
+ * orange/blue pair used by Wordle's high-contrast mode.
+ */
+:root {
+  color-scheme: dark;
+
+  --bg: #08080c;
+  --bg-elev: #111118;
+  --bg-elev-2: #181822;
+  --bg-sunken: #050508;
+  --surface: rgb(255 255 255 / 0.035);
+  --surface-2: rgb(255 255 255 / 0.065);
+  --surface-3: rgb(255 255 255 / 0.1);
+  --border: rgb(255 255 255 / 0.09);
+  --border-strong: rgb(255 255 255 / 0.17);
+  --text: #f3f1ec;
+  --text-dim: #aeacb8;
+  --text-faint: #72707e;
+  --ink-on-accent: #04141c;
+
+  --accent: #74d4ff;
+  --accent-strong: #2bb4f2;
+  --accent-glow: rgb(116 212 255 / 0.35);
+  --blood: #e3263b;
+  --blood-glow: rgb(227 38 59 / 0.4);
+  --gold: #e9c25d;
+
+  --correct: #2c9f5f;
+  --correct-ink: #f4fff8;
+  --partial: #d39d1c;
+  --partial-ink: #1d1400;
+  --wrong: #b02f3c;
+  --wrong-ink: #fff3f4;
+  --tile-empty: #1b1b25;
+
+  --mode-classic: #74d4ff;
+  --mode-release: #ff5a76;
+  --mode-quote: #f3c55a;
+  --mode-emoji: #b996ff;
+  --mode-accent: var(--accent);
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 30px;
+
+  --shadow-sm: 0 2px 8px rgb(0 0 0 / 0.35);
+  --shadow: 0 14px 40px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 30px 80px rgb(0 0 0 / 0.6);
+
+  --font-display: 'Cinzel', 'Trajan Pro', 'Times New Roman', Georgia, serif;
+  --font-body:
+    'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-kanji:
+    'Shippori Kanji', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Noto Serif CJK JP', serif;
+  --font-jp: 'Shippori Names', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+  --font-emoji: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Twemoji Mozilla', sans-serif;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --header-h: 64px;
+  --page-max: 1120px;
+  --gutter: clamp(16px, 4vw, 32px);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #f1ece2;
+  --bg-elev: #fbf8f2;
+  --bg-elev-2: #ffffff;
+  --bg-sunken: #e6dfd1;
+  --surface: rgb(40 30 20 / 0.04);
+  --surface-2: rgb(40 30 20 / 0.07);
+  --surface-3: rgb(40 30 20 / 0.11);
+  --border: rgb(40 30 20 / 0.12);
+  --border-strong: rgb(40 30 20 / 0.22);
+  --text: #19171c;
+  --text-dim: #55505c;
+  --text-faint: #8a8492;
+  --ink-on-accent: #ffffff;
+
+  --accent: #0a6f9e;
+  --accent-strong: #075a82;
+  --accent-glow: rgb(10 111 158 / 0.25);
+  --blood: #c41e30;
+  --blood-glow: rgb(196 30 48 / 0.25);
+  --gold: #a8780f;
+
+  --correct: #23874f;
+  --partial: #c48d0f;
+  --wrong: #b3313d;
+  --tile-empty: #e8e1d4;
+
+  --mode-classic: #0a6f9e;
+  --mode-release: #c8233f;
+  --mode-quote: #a8780f;
+  --mode-emoji: #6d46c9;
+
+  --shadow-sm: 0 2px 8px rgb(60 40 20 / 0.1);
+  --shadow: 0 14px 40px rgb(60 40 20 / 0.14);
+  --shadow-lg: 0 30px 80px rgb(60 40 20 / 0.2);
+}
+
+:root[data-colors='colorblind'] {
+  --correct: #f5793a;
+  --correct-ink: #1f0c00;
+  --partial: #85c0f9;
+  --partial-ink: #04172a;
+  --wrong: #44444f;
+  --wrong-ink: #f5f5f7;
+}
+
+:root[data-theme='light'][data-colors='colorblind'] {
+  --wrong: #6b6b75;
+}
+
+[data-mode='classic'] {
+  --mode-accent: var(--mode-classic);
+}
+[data-mode='release'] {
+  --mode-accent: var(--mode-release);
+}
+[data-mode='quote'] {
+  --mode-accent: var(--mode-quote);
+}
+[data-mode='emoji'] {
+  --mode-accent: var(--mode-emoji);
+}

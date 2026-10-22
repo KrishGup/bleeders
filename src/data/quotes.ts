@@ -216,4 +216,34 @@ export const QUOTES: QuoteEntry[] = [
     'Itsugo! Itsugo!',
     'Happily mispronouncing the name of the Shinigami she has latched onto.',
   ),
+  q(
+    'orihime-inoue',
+    'soul-society',
+    'Sōten Kisshun — I reject!',
+    'Calling on the fairies in her hairpins to undo a friend’s injuries.',
+  ),
+  q(
+    'kenpachi-zaraki',
+    'soul-society',
+    'Let’s enjoy this fight to the fullest!',
+    'Grinning at the intruder who finally gave him a real fight.',
+  ),
+  q(
+    'hiyori-sarugaki',
+    'arrancar',
+    'Shut up, baldy!',
+    'Snapping at the Visored’s bob-haired leader — not for the first time.',
+  ),
+  q(
+    'ryuken-ishida',
+    'arrancar',
+    'I’ll restore your powers on one condition: you will never associate with Shinigami again.',
+    'Bargaining with his powerless son beneath a hospital.',
+  ),
+  q(
+    'zangetsu',
+    'tybw',
+    'I didn’t want you to become a Shinigami.',
+    'Confessing the truth about himself as a familiar blade shatters.',
+  ),
 ];

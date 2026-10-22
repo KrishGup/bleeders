@@ -107,8 +107,8 @@ function HelpBody({ mode }: { mode: ModeId }) {
             The opener is a release command (with the name hidden), a Schrift letter or the name’s meaning.
           </li>
           <li>
-            More clues unlock after {RELEASE_STEPS.slice(1).join(', ')} wrong guesses: what the power does, a
-            masked name, and finally a stronger extra clue.
+            More clues unlock after {RELEASE_STEPS.slice(1).join(', ')} wrong guesses: what the power does,
+            its meaning or wielder, a masked name, and finally a stronger extra clue.
           </li>
           <li>Only characters who have a release clue appear in the suggestions.</li>
         </ul>
@@ -168,6 +168,13 @@ function HelpSheet({ initial }: { initial: ModeId }) {
           <span>Guesses are unlimited. Giving up reveals the answer but breaks your streak.</span>
         </li>
         <li>
+          <Icon name="clock" size={16} />
+          <span>
+            Missed a day? Replay any past puzzle from the <strong>Archive</strong>, or train forever in{' '}
+            <strong>Endless</strong>. Neither touches your streak.
+          </span>
+        </li>
+        <li>
           <Icon name="flame" size={16} />
           <span>
             Solve all four daily modes in one day to achieve <strong>Bankai</strong>.
@@ -188,7 +195,7 @@ function HelpSheet({ initial }: { initial: ModeId }) {
 
 function StatsSheet({ initial }: { initial: ModeId }) {
   const [mode, setMode] = useState<ModeId>(initial);
-  const [kind, setKind] = useState<'daily' | 'endless'>('daily');
+  const [kind, setKind] = useState<'daily' | 'endless' | 'archive'>('daily');
   const state = useStore((s) => s);
   const today = useToday();
   const stats = state.stats[statsKey(mode, kind)] ?? emptyStats();
@@ -196,6 +203,13 @@ function StatsSheet({ initial }: { initial: ModeId }) {
   const winRate = stats.played ? Math.round((stats.won / stats.played) * 100) : 0;
   const average = stats.won ? (stats.totalGuesses / Math.max(1, stats.played)).toFixed(1) : '—';
   const streak = kind === 'daily' ? displayStreak(state, mode, today) : stats.currentStreak;
+  // Replays have no streaks; show how much of the back catalogue is cleared instead.
+  const pastSolved =
+    kind === 'archive'
+      ? Array.from({ length: today }, (_, day) => dailyKey(mode, day)).filter(
+          (key) => state.daily[key]?.status === 'won' || state.archive[key]?.status === 'won',
+        ).length
+      : 0;
 
   const buckets = Array.from({ length: 10 }, (_, i) => {
     const n = i + 1;
@@ -234,6 +248,7 @@ function StatsSheet({ initial }: { initial: ModeId }) {
         options={[
           { value: 'daily', label: 'Daily' },
           { value: 'endless', label: 'Endless' },
+          { value: 'archive', label: 'Archive' },
         ]}
       />
       <div className="stats__tiles">
@@ -245,14 +260,32 @@ function StatsSheet({ initial }: { initial: ModeId }) {
           <span className="stat__value">{winRate}%</span>
           <span className="stat__label">Win rate</span>
         </div>
-        <div className="stat">
-          <span className="stat__value">{streak}</span>
-          <span className="stat__label">{kind === 'daily' ? 'Streak' : 'In a row'}</span>
-        </div>
-        <div className="stat">
-          <span className="stat__value">{stats.maxStreak}</span>
-          <span className="stat__label">Best streak</span>
-        </div>
+        {kind === 'archive' ? (
+          <>
+            <div className="stat">
+              <span className="stat__value">
+                {pastSolved}
+                <small>/{today}</small>
+              </span>
+              <span className="stat__label">Past solved</span>
+            </div>
+            <div className="stat">
+              <span className="stat__value">{stats.hintsUsed}</span>
+              <span className="stat__label">Hints used</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="stat">
+              <span className="stat__value">{streak}</span>
+              <span className="stat__label">{kind === 'daily' ? 'Streak' : 'In a row'}</span>
+            </div>
+            <div className="stat">
+              <span className="stat__value">{stats.maxStreak}</span>
+              <span className="stat__label">Best streak</span>
+            </div>
+          </>
+        )}
         <div className="stat">
           <span className="stat__value">{average}</span>
           <span className="stat__label">Avg. guesses</span>

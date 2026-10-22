@@ -186,34 +186,45 @@ export function redact(text: string, character: Character): string {
   return text.replace(new RegExp(`\\b(${parts.join('|')})\\b`, 'gi'), '▇▇▇');
 }
 
-export const RELEASE_STEPS = [0, 3, 6, 9] as const;
+export const RELEASE_STEPS = [0, 3, 6, 9, 12] as const;
 
-export function releaseClues(entry: ReleaseEntry): Clue[] {
+/** A gentle, non-naming clue about who wields a power. */
+function wielderClue(character: Character): Omit<Clue, 'at'> {
+  const group = character.affiliation.filter((a) => a !== 'None').join(' · ') || character.race.join(' · ');
+  const arc = arcInfo(character.debut);
+  const where = arc.kind === 'movie' ? `the film ${arc.name}` : `the ${arc.name} arc`;
+  return { label: 'Wielder', text: `${group} — first seen in ${where}` };
+}
+
+export function releaseClues(entry: ReleaseEntry, character: Character): Clue[] {
+  const steps: Omit<Clue, 'at'>[] = [];
   if (entry.kind === 'Schrift') {
-    const steps: Omit<Clue, 'at'>[] = [
+    steps.push(
       { label: 'Schrift', text: `“${entry.letter ?? '?'}”`, tone: 'command' },
       { label: 'Ability', text: entry.ability },
       { label: 'Epithet', text: maskName(entry.name), tone: 'name' },
-    ];
-    if (entry.extra) steps.push({ label: 'Also known for', text: entry.extra });
-    return steps.map((clue, i) => ({ ...clue, at: RELEASE_STEPS[i]! }));
-  }
-  const opener: Clue = entry.command
-    ? {
-        at: 0,
+    );
+  } else {
+    if (entry.command) {
+      steps.push({
         label: 'Release command',
         text: `“${entry.command}, ${maskName(entry.name)}!”`,
         tone: 'command',
-      }
-    : entry.meaning
-      ? { at: 0, label: 'Meaning', text: `“${entry.meaning}”`, tone: 'command' }
-      : { at: 0, label: 'Power', text: entry.ability, tone: 'plain' };
-  const rest: Omit<Clue, 'at'>[] = [];
-  if (opener.label !== 'Power') rest.push({ label: 'Ability', text: entry.ability });
-  if (entry.command && entry.meaning) rest.push({ label: 'Meaning', text: `“${entry.meaning}”` });
-  rest.push({ label: 'Name', text: maskName(entry.name), tone: 'name' });
-  if (entry.extra) rest.push({ label: 'Also known for', text: entry.extra });
-  return [opener, ...rest.slice(0, 3).map((clue, i) => ({ ...clue, at: RELEASE_STEPS[i + 1]! }))];
+      });
+      steps.push({ label: 'Ability', text: entry.ability });
+      steps.push(entry.meaning ? { label: 'Meaning', text: `“${entry.meaning}”` } : wielderClue(character));
+    } else if (entry.meaning) {
+      steps.push({ label: 'Meaning', text: `“${entry.meaning}”`, tone: 'command' });
+      steps.push({ label: 'Ability', text: entry.ability });
+      steps.push(wielderClue(character));
+    } else {
+      steps.push({ label: 'Power', text: entry.ability, tone: 'plain' });
+      steps.push(wielderClue(character));
+    }
+    steps.push({ label: 'Name', text: maskName(entry.name), tone: 'name' });
+  }
+  if (entry.extra) steps.push({ label: 'Also known for', text: entry.extra });
+  return steps.map((clue, i) => ({ ...clue, at: RELEASE_STEPS[i]! }));
 }
 
 export function quoteClues(entry: QuoteEntry, character: Character): Clue[] {
@@ -256,7 +267,7 @@ export function classicHints(character: Character): ClassicHint[] {
 export function cluesFor(mode: Exclude<ModeId, 'classic'>, clueId: string, character: Character): Clue[] {
   switch (mode) {
     case 'release':
-      return releaseClues(releaseEntry(clueId));
+      return releaseClues(releaseEntry(clueId), character);
     case 'quote':
       return quoteClues(quoteEntry(clueId), character);
     case 'emoji':

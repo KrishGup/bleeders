@@ -22,11 +22,16 @@ export interface Transition {
   finished?: 'won' | 'lost';
 }
 
-export function newDailyRecord(mode: ModeId, day: number, now: number): GameRecord {
+export function newDailyRecord(
+  mode: ModeId,
+  day: number,
+  now: number,
+  kind: 'daily' | 'archive' = 'daily',
+): GameRecord {
   const puzzle = dailyPuzzle(mode, day);
   return {
     mode,
-    kind: 'daily',
+    kind,
     day,
     answer: puzzle.answer,
     ...(puzzle.clue ? { clue: puzzle.clue } : {}),
@@ -63,9 +68,23 @@ export function getDailyRecord(state: PersistedState, mode: ModeId, day: number,
   return state.daily[dailyKey(mode, day)] ?? newDailyRecord(mode, day, now);
 }
 
+/**
+ * A past daily, replayed from the archive. If the player finished it on the
+ * day itself, that result is shown instead.
+ */
+export function getArchiveRecord(state: PersistedState, mode: ModeId, day: number, now: number): GameRecord {
+  const key = dailyKey(mode, day);
+  const live = state.daily[key];
+  if (live && live.status !== 'playing') return live;
+  return state.archive[key] ?? newDailyRecord(mode, day, now, 'archive');
+}
+
 function putRecord(state: PersistedState, record: GameRecord): PersistedState {
   if (record.kind === 'daily') {
     return { ...state, daily: { ...state.daily, [dailyKey(record.mode, record.day!)]: record } };
+  }
+  if (record.kind === 'archive') {
+    return { ...state, archive: { ...state.archive, [dailyKey(record.mode, record.day!)]: record } };
   }
   return { ...state, endless: { ...state.endless, [record.mode]: record } };
 }
@@ -94,7 +113,7 @@ function finish(state: PersistedState, record: GameRecord, won: boolean): Persis
     if (record.kind === 'daily') {
       stats.currentStreak = stats.lastWonDay === record.day! - 1 ? stats.currentStreak + 1 : 1;
       stats.lastWonDay = record.day!;
-    } else {
+    } else if (record.kind === 'endless') {
       stats.currentStreak += 1;
     }
     stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak);

@@ -1,6 +1,6 @@
 import type { ModeId } from '../data/types';
 
-export type GameKind = 'daily' | 'endless';
+export type GameKind = 'daily' | 'endless' | 'archive';
 export type GameStatus = 'playing' | 'won' | 'lost';
 
 /** Which characters Endless mode may pick from. */
@@ -9,7 +9,7 @@ export type PoolFilter = 'all' | 'main' | 'canon' | 'filler';
 export interface GameRecord {
   mode: ModeId;
   kind: GameKind;
-  /** Daily puzzles only. */
+  /** Daily and archive puzzles. */
   day?: number;
   /** Character id of the answer — locked in when the game starts. */
   answer: string;
@@ -78,6 +78,8 @@ export interface PersistedState {
   daily: Record<string, GameRecord>;
   /** The in-progress (or last finished) Endless game per mode. */
   endless: Partial<Record<ModeId, GameRecord>>;
+  /** Past dailies replayed from the archive, keyed by `${mode}:${day}`. */
+  archive: Record<string, GameRecord>;
   stats: Record<string, ModeStats>;
   collection: Record<string, CollectionEntry>;
   /** Achievement id → unlock time. */
@@ -116,6 +118,7 @@ export function initialState(): PersistedState {
     settings: { ...DEFAULT_SETTINGS },
     daily: {},
     endless: {},
+    archive: {},
     stats: {},
     collection: {},
     achievements: {},
@@ -130,7 +133,7 @@ export function dailyKey(mode: ModeId, day: number): string {
 }
 
 export function statsKey(mode: ModeId, kind: GameKind): string {
-  return kind === 'daily' ? mode : `endless:${mode}`;
+  return kind === 'daily' ? mode : `${kind}:${mode}`;
 }
 
 /** Merge whatever was saved with current defaults so new fields always exist. */
@@ -146,6 +149,7 @@ export function hydrate(saved: unknown): PersistedState {
     counters: { ...base.counters, ...s.counters },
     daily: s.daily ?? {},
     endless: s.endless ?? {},
+    archive: s.archive ?? {},
     stats: s.stats ?? {},
     collection: s.collection ?? {},
     achievements: s.achievements ?? {},

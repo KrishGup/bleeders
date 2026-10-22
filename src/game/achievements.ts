@@ -20,7 +20,7 @@ function sum(state: PersistedState, pick: (key: string) => boolean, field: 'won'
     .reduce((total, [, stats]) => total + stats[field], 0);
 }
 
-const isDaily = (key: string) => !key.startsWith('endless:');
+const isDaily = (key: string) => !key.includes(':');
 const isEndless = (key: string) => key.startsWith('endless:');
 const any = () => true;
 
@@ -33,7 +33,11 @@ function fastestWin(state: PersistedState): number {
 }
 
 function longestWin(state: PersistedState): number {
-  const allRecords = [...Object.values(state.daily), ...Object.values(state.endless)];
+  const allRecords = [
+    ...Object.values(state.daily),
+    ...Object.values(state.endless),
+    ...Object.values(state.archive),
+  ];
   return Math.max(
     0,
     ...allRecords.filter((record) => record?.status === 'won').map((record) => record!.guesses.length),

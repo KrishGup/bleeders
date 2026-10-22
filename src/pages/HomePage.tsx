@@ -130,6 +130,18 @@ export function HomePage() {
           </span>
           <Icon name="infinity" />
         </a>
+        <a href="#/classic/archive" className="extra-card">
+          <span className="extra-card__kanji kanji">暦</span>
+          <span className="extra-card__text">
+            <span className="extra-card__title">Puzzle archive</span>
+            <span className="extra-card__sub">
+              {today === 0
+                ? 'Missed a day? Past puzzles land here from tomorrow.'
+                : `Replay ${today} past ${today === 1 ? 'puzzle' : 'puzzles'} per mode — your streak stays safe.`}
+            </span>
+          </span>
+          <Icon name="calendar" />
+        </a>
         <a href="#/registry" className="extra-card">
           <span className="extra-card__kanji kanji">名簿</span>
           <span className="extra-card__text">

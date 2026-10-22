@@ -22,11 +22,14 @@ New puzzles arrive at local midnight and are the same for everyone. Guesses are 
   Army), Hueco Mundo filler episodes, and the four films. Filler characters can be daily answers too.
 - **Endless training.** Unlimited puzzles in every mode, filtered by _Everyone_, _Main cast_, _Canon_ or
   _Filler & films_.
+- **Archive.** Replay any past daily puzzle in any mode. Replays have their own stats, never touch your streak, and
+  shared results link straight to the same puzzle.
 - **Soul Registry.** Browse and filter every character's dossier, and collect each one by solving it. Solving a soul
   also unlocks its release, quote and emoji clues in the registry.
 - **23 achievements,** from _Shunpo_ (win on your first guess) to _Bankai_ (clear all four modes in a day) to
   _Soul King_.
-- **Stats.** Streaks, win rate, average guesses and a guess-distribution chart for each mode.
+- **Stats.** Streaks, win rate, average guesses and a guess-distribution chart for each mode, kept separately for
+  daily, endless and archive play.
 - **Sharing.** Spoiler-free emoji grids with streak and hint counts. Uses the native share sheet on phones and the
   clipboard elsewhere.
 - **Hints and look-alikes.** Classic offers optional hints: an epithet after 5 misses and a redacted dossier after 9.

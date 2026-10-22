@@ -1,7 +1,7 @@
 import { arcInfo, insigniaOf, MODES, modeInfo } from '../data/taxonomy';
 import type { Character, ModeId } from '../data/types';
 import { emojiEntry, quoteEntry, releaseEntry } from '../game/engine';
-import { buildShareText } from '../game/share';
+import { buildShareText, shareRoute } from '../game/share';
 import type { GameView } from '../hooks/useGame';
 import { announceUnlocks } from '../hooks/useGame';
 import { shareText, siteUrl } from '../lib/clipboard';
@@ -97,7 +97,10 @@ export function VictoryPanel({ view, onNextEndless }: { view: GameView; onNextEn
   const streak =
     kind === 'daily'
       ? displayStreak(state, mode, today)
-      : (state.stats[`endless:${mode}`]?.currentStreak ?? 0);
+      : kind === 'endless'
+        ? (state.stats[`endless:${mode}`]?.currentStreak ?? 0)
+        : 0;
+  const replayDay = record.day ?? 0;
   const remaining = MODES.filter(
     (m) =>
       m.id !== mode &&
@@ -110,7 +113,7 @@ export function VictoryPanel({ view, onNextEndless }: { view: GameView; onNextEn
     const text = buildShareText(record, {
       colorblind: state.settings.colors === 'colorblind',
       streak,
-      url: siteUrl(),
+      url: `${siteUrl()}${shareRoute(record)}`,
     });
     const outcome = await shareText(text);
     if (outcome === 'copied') ui.toast('Result copied — paste it anywhere!', 'success');
@@ -128,9 +131,9 @@ export function VictoryPanel({ view, onNextEndless }: { view: GameView; onNextEn
         <span className="kanji victory__kanji">{won ? '見事' : '撤退'}</span>
         <div>
           <p className="victory__eyebrow">
-            {kind === 'daily'
-              ? `Bleedle #${puzzleNumber(record.day ?? 0)} · ${modeInfo(mode).title}`
-              : `Endless · ${modeInfo(mode).title}`}
+            {kind === 'endless'
+              ? `Endless · ${modeInfo(mode).title}`
+              : `Bleedle #${puzzleNumber(replayDay)} · ${modeInfo(mode).title}${kind === 'archive' ? ' · Archive' : ''}`}
           </p>
           <h2 className="victory__title">
             {won ? `Soul found in ${count} ${count === 1 ? 'guess' : 'guesses'}!` : 'The soul slipped away…'}
@@ -163,9 +166,20 @@ export function VictoryPanel({ view, onNextEndless }: { view: GameView; onNextEn
             {record.hints.length === 1 ? 'hint' : 'hints'}
           </span>
         ) : null}
-        <span className={`chip${streak > 0 ? ' chip--gold' : ''}`}>
-          <Icon name="flame" size={14} /> {streak} {kind === 'daily' ? 'day streak' : 'in a row'}
-        </span>
+        {kind === 'archive' ? (
+          <span className="chip">
+            <Icon name="calendar" size={14} /> Archive replay
+          </span>
+        ) : null}
+        {kind !== 'archive' && won ? (
+          <span className={`chip${streak > 0 ? ' chip--gold' : ''}`}>
+            <Icon name="flame" size={14} /> {streak} {kind === 'daily' ? 'day streak' : 'in a row'}
+          </span>
+        ) : kind === 'daily' ? (
+          <span className="chip chip--danger">
+            <Icon name="flame" size={14} /> Streak reset
+          </span>
+        ) : null}
       </div>
 
       <div className="victory__actions">
@@ -176,6 +190,11 @@ export function VictoryPanel({ view, onNextEndless }: { view: GameView; onNextEn
           <button type="button" className="btn btn--lg" onClick={onNextEndless}>
             <Icon name="refresh" size={18} /> Next soul
           </button>
+        ) : null}
+        {kind === 'archive' && replayDay + 1 < today ? (
+          <a className="btn btn--lg" href={`#/${mode}/archive/${puzzleNumber(replayDay + 1)}`}>
+            <Icon name="next" size={18} /> Play #{puzzleNumber(replayDay + 1)}
+          </a>
         ) : null}
         <a className="btn btn--lg" href={`#/registry/${answer.id}`}>
           <Icon name="book" size={18} /> Registry entry

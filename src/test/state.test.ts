@@ -4,6 +4,7 @@ import { dailyPuzzle } from '../game/engine';
 import {
   applyGuess,
   displayStreak,
+  getArchiveRecord,
   getDailyRecord,
   giveUp,
   newDailyRecord,
@@ -101,6 +102,22 @@ describe('game state', () => {
     s = startEndless(s, 'classic', 'filler', mulberry32(1), NOW);
     expect(s.endless.classic!.answer).not.toBe(first.answer);
     expect(s.counters.endlessStarted).toBe(2);
+  });
+
+  it('replays past dailies from the archive without touching streaks', () => {
+    let s = solve(initialState(), 'classic', 3);
+    const before = s.stats.classic;
+    const record = getArchiveRecord(s, 'classic', 1, NOW);
+    expect(record.kind).toBe('archive');
+    const t = applyGuess(s, record, dailyPuzzle('classic', 1).answer, NOW)!;
+    s = t.state;
+    expect(t.finished).toBe('won');
+    expect(s.stats.classic).toEqual(before);
+    expect(s.stats['archive:classic']).toMatchObject({ played: 1, won: 1, currentStreak: 0 });
+    expect(s.archive[dailyKey('classic', 1)]?.status).toBe('won');
+    expect(s.perfectDays).toEqual([]);
+    // A puzzle finished live shows its live result in the archive.
+    expect(getArchiveRecord(s, 'classic', 3, NOW).kind).toBe('daily');
   });
 
   it('counts shares', () => {

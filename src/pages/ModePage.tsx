@@ -11,6 +11,7 @@ import { sfx } from '../lib/sound';
 import type { GameKind, PoolFilter } from '../state/model';
 import { useSettings } from '../state/store';
 import { ui } from '../state/ui';
+import { ArchiveList } from '../components/ArchiveList';
 import { Avatar } from '../components/Avatar';
 import { ClassicBoard } from '../components/ClassicBoard';
 import { FLIP_TOTAL_MS, twinsOf } from '../game/board';
@@ -119,8 +120,26 @@ function EndlessBar({ view, onNew }: { view: GameView; onNew: (pool?: PoolFilter
   );
 }
 
-export function ModePage({ mode, kind }: { mode: ModeId; kind: GameKind }) {
-  const view = useGame(mode, kind);
+const KIND_OPTIONS = [
+  { value: 'daily', label: 'Daily' },
+  { value: 'endless', label: 'Endless' },
+  { value: 'archive', label: 'Archive' },
+] as const;
+
+function KindSwitch({ mode, kind }: { mode: ModeId; kind: GameKind }) {
+  return (
+    <Segmented
+      label="Puzzle type"
+      size="sm"
+      value={kind}
+      onChange={(value) => navigate(value === 'daily' ? `/${mode}` : `/${mode}/${value}`)}
+      options={KIND_OPTIONS}
+    />
+  );
+}
+
+export function ModePage({ mode, kind, day }: { mode: ModeId; kind: GameKind; day?: number }) {
+  const view = useGame(mode, kind, day ?? 0);
   const settings = useSettings();
   const info = modeInfo(mode);
   const [showVictory, setShowVictory] = useState(view.status !== 'playing');
@@ -170,6 +189,30 @@ export function ModePage({ mode, kind }: { mode: ModeId; kind: GameKind }) {
     if (!result) ui.toast('Already guessed — try another soul.', 'error');
   };
 
+  const info0 = modeInfo(mode);
+  if (kind === 'archive' && (day === undefined || !Number.isInteger(day) || day < 0 || day >= view.today)) {
+    return (
+      <div className="mode-page" data-mode={mode}>
+        <header className="mode-head">
+          <span className="mode-head__kanji kanji" aria-hidden="true">
+            {info0.kanji}
+          </span>
+          <div className="mode-head__text">
+            <h1 className="mode-head__title">{info0.title}</h1>
+            <p className="mode-head__sub">Archive · every past puzzle, ready to replay</p>
+          </div>
+          <KindSwitch mode={mode} kind={kind} />
+        </header>
+        {day !== undefined ? (
+          <p className="archive-missing">
+            That puzzle isn’t in the archive yet. <a href={`#/${mode}/archive`}>See all past puzzles</a>
+          </p>
+        ) : null}
+        <ArchiveList mode={mode} today={view.today} />
+      </div>
+    );
+  }
+
   if (!view.record || !view.answer) {
     return (
       <div className="mode-page" data-mode={mode}>
@@ -194,20 +237,19 @@ export function ModePage({ mode, kind }: { mode: ModeId; kind: GameKind }) {
           <p className="mode-head__sub">
             {kind === 'daily'
               ? `Bleedle #${puzzleNumber(view.today)} · ${formatDay(view.today)}`
-              : 'Endless training · no streaks on the line'}
+              : kind === 'archive'
+                ? `Bleedle #${puzzleNumber(view.day)} · ${formatDay(view.day)} · Archive replay`
+                : 'Endless training · no streaks on the line'}
           </p>
         </div>
-        <Segmented
-          label="Puzzle type"
-          size="sm"
-          value={kind}
-          onChange={(value) => navigate(value === 'daily' ? `/${mode}` : `/${mode}/endless`)}
-          options={[
-            { value: 'daily', label: 'Daily' },
-            { value: 'endless', label: 'Endless' },
-          ]}
-        />
+        <KindSwitch mode={mode} kind={kind} />
       </header>
+
+      {kind === 'archive' ? (
+        <a className="archive-back" href={`#/${mode}/archive`}>
+          <Icon name="back" size={16} /> All past puzzles
+        </a>
+      ) : null}
 
       {kind === 'endless' ? <EndlessBar view={view} onNew={requestNewEndless} /> : null}
 
@@ -283,7 +325,7 @@ export function ModePage({ mode, kind }: { mode: ModeId; kind: GameKind }) {
           kind === 'daily' ? (
             <p>The answer will be revealed and today’s game counts as a loss — your streak resets to zero.</p>
           ) : (
-            <p>The answer will be revealed and this Endless game counts as a loss.</p>
+            <p>The answer will be revealed and this game counts as a loss.</p>
           )
         }
         confirmLabel="Give up"

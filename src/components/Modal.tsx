@@ -12,6 +12,18 @@ interface ModalProps {
   mode?: string;
 }
 
+/** How many dialogs are open — the page scroll stays locked until the last one closes. */
+let openDialogs = 0;
+
+function lockScroll(): () => void {
+  openDialogs += 1;
+  document.documentElement.classList.add('has-modal');
+  return () => {
+    openDialogs = Math.max(0, openDialogs - 1);
+    if (openDialogs === 0) document.documentElement.classList.remove('has-modal');
+  };
+}
+
 /** Native <dialog>: focus trapping, Esc-to-close and top-layer stacking for free. */
 export function Modal({ open, onClose, title, kanji, size = 'md', children, footer, mode }: ModalProps) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -26,10 +38,8 @@ export function Modal({ open, onClose, title, kanji, size = 'md', children, foot
     } else if (!open && dialog.open) {
       dialog.close();
     }
-    document.documentElement.classList.toggle('has-modal', open);
+    return open ? lockScroll() : undefined;
   }, [open]);
-
-  useEffect(() => () => document.documentElement.classList.remove('has-modal'), []);
 
   return (
     <dialog

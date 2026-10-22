@@ -63,6 +63,19 @@ export function GuessInput({ candidates, exclude, onGuess, disabled, helper, aut
     if (autoFocus && !disabled && window.matchMedia('(pointer: fine)').matches) inputRef.current?.focus();
   }, [autoFocus, disabled]);
 
+  // Press "/" anywhere to jump to the guess box.
+  useEffect(() => {
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.closest('input, textarea, select, [contenteditable="true"], dialog[open]')) return;
+      event.preventDefault();
+      inputRef.current?.focus();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   useEffect(() => {
     listRef.current?.querySelector(`[data-index="${active}"]`)?.scrollIntoView({ block: 'nearest' });
   }, [active]);

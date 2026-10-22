@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { MODES, modeInfo } from './data/taxonomy';
 import type { ModeId } from './data/types';
 import { useHashRoute } from './hooks/useHashRoute';
@@ -21,12 +21,9 @@ function useRoute() {
   const { path, segments } = useHashRoute();
   const [first, second] = segments;
   if (first && MODE_IDS.has(first)) {
-    return {
-      path,
-      page: 'mode' as const,
-      mode: first as ModeId,
-      kind: second === 'endless' ? ('endless' as const) : ('daily' as const),
-    };
+    const kind = second === 'endless' ? 'endless' : second === 'archive' ? 'archive' : 'daily';
+    const day = kind === 'archive' && segments[2] !== undefined ? Number(segments[2]) - 1 : undefined;
+    return { path, page: 'mode' as const, mode: first as ModeId, kind, day } as const;
   }
   if (first === 'registry') return { path, page: 'registry' as const, selected: second };
   if (first === 'achievements') return { path, page: 'achievements' as const };
@@ -43,13 +40,17 @@ export function App() {
   const route = useRoute();
   const { reducedMotion } = useSettingsEffects();
 
+  const previousPath = useRef(route.path);
   useEffect(() => {
     document.title =
       route.page === 'mode'
         ? `${modeInfo(route.mode).title} · Bleedle`
         : (TITLES[route.page] ?? TITLES.home!);
-    window.scrollTo({ top: 0 });
-  }, [route.page, route.page === 'mode' ? route.mode : null, route.page === 'mode' ? route.kind : null]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Opening a registry profile shouldn't scroll the grid behind it.
+    const before = previousPath.current;
+    previousPath.current = route.path;
+    if (!(before.startsWith('/registry') && route.path.startsWith('/registry'))) window.scrollTo({ top: 0 });
+  }, [route.path]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // First visit: show the rules once.
   useEffect(() => {
@@ -82,7 +83,12 @@ export function App() {
       <main id="main" className="main">
         {route.page === 'home' ? <HomePage /> : null}
         {route.page === 'mode' ? (
-          <ModePage key={`${route.mode}:${route.kind}`} mode={route.mode} kind={route.kind} />
+          <ModePage
+            key={`${route.mode}:${route.kind}:${route.day ?? ''}`}
+            mode={route.mode}
+            kind={route.kind}
+            {...(route.day !== undefined ? { day: route.day } : {})}
+          />
         ) : null}
         {route.page === 'registry' ? (
           <RegistryPage {...(route.selected ? { selected: route.selected } : {})} />

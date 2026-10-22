@@ -11,7 +11,7 @@ import {
   releaseClues,
   releaseEntry,
 } from '../game/engine';
-import { buildShareText, classicGrid, streakLine } from '../game/share';
+import { buildShareText, classicGrid, shareRoute, streakLine } from '../game/share';
 import { mulberry32 } from '../lib/hash';
 import { initialsOf } from '../lib/monogram';
 import type { GameRecord } from '../state/model';
@@ -30,25 +30,40 @@ describe('clue ladders', () => {
     expect(redact('Kurosaki fights. Ichigo wins. Strawberry!', ichigo)).toBe('▇▇▇ fights. ▇▇▇ wins. ▇▇▇!');
   });
 
-  it('builds a four-step ladder for zanpakutō with commands', () => {
-    const clues = releaseClues(releaseEntry('byakuya-kuchiki:shikai'));
-    expect(clues.map((c) => c.at)).toEqual([0, 3, 6, 9]);
+  it('builds a five-step ladder for zanpakutō with commands', () => {
+    const clues = releaseClues(releaseEntry('byakuya-kuchiki:shikai'), characterById('byakuya-kuchiki'));
+    expect(clues.map((c) => c.at)).toEqual([0, 3, 6, 9, 12]);
+    expect(clues.map((c) => c.label)).toEqual([
+      'Release command',
+      'Ability',
+      'Meaning',
+      'Name',
+      'Also known for',
+    ]);
     expect(clues[0]!.text).toBe('“Scatter, S•••••••••••!”');
     expect(clues.some((c) => c.text.includes('Senbonzakura') && c.at === 0)).toBe(false);
   });
 
   it('opens Schrift clues with the letter', () => {
-    const clues = releaseClues(releaseEntry('as-nodt:schrift'));
+    const clues = releaseClues(releaseEntry('as-nodt:schrift'), characterById('as-nodt'));
     expect(clues[0]).toMatchObject({ label: 'Schrift', text: '“F”', at: 0 });
     expect(clues[2]!.text).toBe('T•• F•••');
   });
 
   it('never leaks the release name before the masked step', () => {
     for (const entry of RELEASES) {
-      const clues = releaseClues(entry);
+      const clues = releaseClues(entry, characterById(entry.character));
+      expect(clues.length, entry.id).toBeGreaterThanOrEqual(3);
       const early = clues.filter((c) => c.at < 6 && c.tone !== 'name');
       for (const clue of early) expect(clue.text.includes(entry.name), entry.id).toBe(false);
     }
+  });
+
+  it('pads bare powers with a non-naming wielder clue', () => {
+    const clues = releaseClues(releaseEntry('mabashi:bount-doll'), characterById('mabashi'));
+    expect(clues.map((c) => c.label)).toEqual(['Power', 'Wielder', 'Name']);
+    expect(clues[1]!.text).toBe('Bount — first seen in the Bount arc');
+    expect(clues[1]!.text).not.toMatch(/Mabashi/);
   });
 
   it('reveals emoji one by one, then debut and initials', () => {
@@ -117,5 +132,15 @@ describe('share text', () => {
     expect(text.split('\n')[0]).toBe('Bleedle #1 · Classic 魂');
     expect(text).toContain('Found in 3 guesses 💡1 🔥4');
     expect(text.endsWith('https://bleedle.test/')).toBe(true);
+  });
+
+  it('links shares back to the same puzzle', () => {
+    expect(shareRoute(base)).toBe('#/classic');
+    expect(shareRoute({ ...base, kind: 'endless' })).toBe('#/classic/endless');
+    const replay = { ...base, mode: 'quote' as const, kind: 'archive' as const, day: 2 };
+    expect(shareRoute(replay)).toBe('#/quote/archive/3');
+    expect(buildShareText(replay, { colorblind: false, streak: 0, url: 'u' }).split('\n')[0]).toBe(
+      'Bleedle #3 (archive) · Quote 言',
+    );
   });
 });

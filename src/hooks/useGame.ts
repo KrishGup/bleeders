@@ -7,6 +7,7 @@ import { mulberry32, randomSeed } from '../lib/hash';
 import { sfx } from '../lib/sound';
 import {
   applyGuess,
+  getArchiveRecord,
   getDailyRecord,
   giveUp as giveUpAction,
   newDailyRecord,
@@ -23,6 +24,8 @@ export interface GameView {
   mode: ModeId;
   kind: GameKind;
   today: number;
+  /** The puzzle's day (today for Daily/Endless, the chosen day in the archive). */
+  day: number;
   record: GameRecord | null;
   answer: Character | null;
   guesses: Character[];
@@ -57,20 +60,34 @@ export function announceUnlocks(ids: string[], delay = 0): void {
   });
 }
 
-function currentRecord(mode: ModeId, kind: GameKind, today: number): GameRecord | undefined {
-  const s = store.get();
-  return kind === 'daily' ? getDailyRecord(s, mode, today, Date.now()) : s.endless[mode];
+function recordFrom(
+  s: ReturnType<typeof store.get>,
+  mode: ModeId,
+  kind: GameKind,
+  day: number,
+): GameRecord | undefined {
+  if (kind === 'daily') return getDailyRecord(s, mode, day, Date.now());
+  if (kind === 'archive') return getArchiveRecord(s, mode, day, Date.now());
+  return s.endless[mode];
 }
 
-export function useGame(mode: ModeId, kind: GameKind): GameView {
+export function useGame(mode: ModeId, kind: GameKind, archiveDay = 0): GameView {
   const today = useToday();
-  const saved = useStore((s) => (kind === 'daily' ? s.daily[dailyKey(mode, today)] : s.endless[mode]));
+  const day = kind === 'archive' ? archiveDay : today;
+  const saved = useStore((s) => {
+    const key = dailyKey(mode, day);
+    if (kind === 'daily') return s.daily[key];
+    if (kind === 'archive')
+      return s.daily[key]?.status !== 'playing' && s.daily[key] ? s.daily[key] : s.archive[key];
+    return s.endless[mode];
+  });
 
   const record = useMemo<GameRecord | null>(() => {
     if (saved) return saved;
     // Not saved until the first guess; `startedAt` is filled in then.
-    return kind === 'daily' ? newDailyRecord(mode, today, 0) : null;
-  }, [saved, kind, mode, today]);
+    if (kind === 'endless') return null;
+    return newDailyRecord(mode, day, 0, kind);
+  }, [saved, kind, mode, day]);
 
   // Endless games start themselves the first time the page opens.
   useEffect(() => {
@@ -98,7 +115,7 @@ export function useGame(mode: ModeId, kind: GameKind): GameView {
     (id: string) => {
       const box: { result: Transition | null } = { result: null };
       store.update((s) => {
-        const current = kind === 'daily' ? getDailyRecord(s, mode, today, Date.now()) : s.endless[mode];
+        const current = recordFrom(s, mode, kind, day);
         if (!current) return s;
         box.result = applyGuess(s, current, id, Date.now());
         return box.result ? box.result.state : s;
@@ -106,21 +123,21 @@ export function useGame(mode: ModeId, kind: GameKind): GameView {
       if (box.result) announceUnlocks(box.result.unlocked, mode === 'classic' ? 2400 : 1200);
       return box.result;
     },
-    [kind, mode, today],
+    [kind, mode, day],
   );
 
   const revealHint = useCallback(
     (index: number) => {
-      const current = currentRecord(mode, kind, today);
+      const current = recordFrom(store.get(), mode, kind, day);
       if (!current) return;
       store.update((s) => revealHintAction(s, current, index));
       sfx.clue();
     },
-    [mode, kind, today],
+    [mode, kind, day],
   );
 
   const giveUp = useCallback(() => {
-    const current = currentRecord(mode, kind, today);
+    const current = recordFrom(store.get(), mode, kind, day);
     if (!current) return;
     const box: { result: Transition | null } = { result: null };
     store.update((s) => {
@@ -131,7 +148,7 @@ export function useGame(mode: ModeId, kind: GameKind): GameView {
       sfx.lose();
       announceUnlocks(box.result.unlocked, 800);
     }
-  }, [mode, kind, today]);
+  }, [mode, kind, day]);
 
   const newEndless = useCallback(
     (pool?: PoolFilter) => {
@@ -148,6 +165,7 @@ export function useGame(mode: ModeId, kind: GameKind): GameView {
     mode,
     kind,
     today,
+    day,
     record,
     answer,
     guesses,

@@ -41,12 +41,19 @@ export function streakLine(record: GameRecord, colorblind: boolean): string {
   return `${miss.repeat(10)} ⋯ +${misses - 10} ${tail}`;
 }
 
+/** Where a shared link should land: the same mode, and the exact puzzle for replays. */
+export function shareRoute(record: GameRecord): string {
+  if (record.kind === 'archive') return `#/${record.mode}/archive/${puzzleNumber(record.day ?? 0)}`;
+  if (record.kind === 'endless') return `#/${record.mode}/endless`;
+  return `#/${record.mode}`;
+}
+
 export function buildShareText(record: GameRecord, options: ShareOptions): string {
   const mode = modeInfo(record.mode);
   const title =
-    record.kind === 'daily'
-      ? `Bleedle #${puzzleNumber(record.day ?? 0)} · ${mode.title} ${mode.kanji}`
-      : `Bleedle Endless · ${mode.title} ${mode.kanji}`;
+    record.kind === 'endless'
+      ? `Bleedle Endless · ${mode.title} ${mode.kanji}`
+      : `Bleedle #${puzzleNumber(record.day ?? 0)}${record.kind === 'archive' ? ' (archive)' : ''} · ${mode.title} ${mode.kanji}`;
   const count = record.guesses.length;
   const result =
     record.status === 'won'

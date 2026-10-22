@@ -11,6 +11,21 @@ import { Icon } from './Icon';
 
 const VERDICT_TEXT = { correct: 'correct', partial: 'partial match', wrong: 'no match' } as const;
 
+/**
+ * Phones stack each guess as a card: short-valued tiles on top, the three
+ * with long values (affiliation, rank, debut) in a wider bottom row. Tiles
+ * flip in that visual order.
+ */
+const MOBILE_ORDER: Record<CellResult['key'], number> = {
+  gender: 0,
+  race: 1,
+  insignia: 2,
+  hair: 3,
+  affiliation: 4,
+  rank: 5,
+  debut: 6,
+};
+
 function describe(cell: CellResult, guess: Character): string {
   const label = ATTRIBUTES.find((a) => a.key === cell.key)!.label;
   let detail = cell.values.join(', ');
@@ -88,7 +103,8 @@ function BoardRow({ guess, answer, fresh, fillerBadges }: RowProps) {
           key={cell.key}
           role="cell"
           className={`tile tile--${cell.verdict}`}
-          style={{ '--i': i } as CSSProperties}
+          data-attr={cell.key}
+          style={{ '--i': i, '--mi': MOBILE_ORDER[cell.key] } as CSSProperties}
           title={describe(cell, guess)}
           aria-label={describe(cell, guess)}
         >

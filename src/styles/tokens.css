@@ -64,6 +64,21 @@
   --header-h: 64px;
   --page-max: 1120px;
   --gutter: clamp(16px, 4vw, 32px);
+
+  /* Notches, rounded corners and the home indicator (the page uses viewport-fit=cover). */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --header-total: calc(var(--header-h) + var(--safe-top));
+  --page-left: max(var(--gutter), var(--safe-left));
+  --page-right: max(var(--gutter), var(--safe-right));
+}
+
+@media (max-width: 560px) {
+  :root {
+    --header-h: 58px;
+  }
 }
 
 :root[data-theme='light'] {

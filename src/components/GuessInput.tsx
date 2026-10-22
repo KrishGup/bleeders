@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import type { Character } from '../data/types';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { normalize, searchCharacters, buildSearchIndex } from '../lib/search';
 import { useSettings } from '../state/store';
 import { Avatar } from './Avatar';
@@ -43,13 +44,42 @@ function Highlight({ text, query }: { text: string; query: string }) {
   );
 }
 
+/**
+ * On touch screens, lift the guess box to just under the header so its suggestions clear the
+ * on-screen keyboard. Short pages get temporary room below (`.is-guessing`) so the lift always
+ * fits. Returns the scroll position to come back to, or null if nothing moved.
+ */
+function liftAboveKeyboard(root: HTMLElement | null): number | null {
+  if (!root || !window.matchMedia('(pointer: coarse)').matches) return null;
+  const header = document.querySelector('.header')?.getBoundingClientRect().bottom ?? 0;
+  const offset = root.getBoundingClientRect().top - header - 10;
+  if (Math.abs(offset) <= 12) return null;
+  const html = document.documentElement;
+  html.classList.add('is-guessing');
+  const from = window.scrollY;
+  // Jump, don't glide: the keyboard is already sliding in. (Overrides the page's smooth scrolling.)
+  const behavior = html.style.scrollBehavior;
+  html.style.scrollBehavior = 'auto';
+  window.scrollTo(0, from + offset);
+  html.style.scrollBehavior = behavior;
+  return from;
+}
+
+/** Drop the temporary room once the guess box is no longer in use. */
+function settleAfterGuessing(input: HTMLInputElement | null) {
+  if (document.activeElement !== input) document.documentElement.classList.remove('is-guessing');
+}
+
 export function GuessInput({ candidates, exclude, onGuess, disabled, helper, autoFocus }: GuessInputProps) {
   const settings = useSettings();
+  const compact = useMediaQuery('(max-width: 480px)');
   const index = useMemo(() => buildSearchIndex(candidates), [candidates]);
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const [shake, setShake] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const liftedFrom = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const listId = useId();
@@ -62,6 +92,9 @@ export function GuessInput({ candidates, exclude, onGuess, disabled, helper, aut
   useEffect(() => {
     if (autoFocus && !disabled && window.matchMedia('(pointer: fine)').matches) inputRef.current?.focus();
   }, [autoFocus, disabled]);
+
+  // Leaving the page mid-guess shouldn't strand the extra keyboard room.
+  useEffect(() => () => document.documentElement.classList.remove('is-guessing'), []);
 
   // Press "/" anywhere to jump to the guess box.
   useEffect(() => {
@@ -80,6 +113,29 @@ export function GuessInput({ candidates, exclude, onGuess, disabled, helper, aut
     listRef.current?.querySelector(`[data-index="${active}"]`)?.scrollIntoView({ block: 'nearest' });
   }, [active]);
 
+  const showList = open && query.trim().length > 0;
+
+  // Keep the suggestion list inside what's actually visible (the on-screen keyboard shrinks the
+  // visual viewport, not the layout one).
+  useEffect(() => {
+    const list = listRef.current;
+    const viewport = window.visualViewport;
+    if (!showList || !list || !viewport) return;
+    const fit = () => {
+      const space = viewport.offsetTop + viewport.height - list.getBoundingClientRect().top - 12;
+      list.style.setProperty('--list-max', `${Math.round(Math.max(150, Math.min(420, space)))}px`);
+    };
+    fit();
+    viewport.addEventListener('resize', fit);
+    viewport.addEventListener('scroll', fit);
+    window.addEventListener('scroll', fit, { passive: true });
+    return () => {
+      viewport.removeEventListener('resize', fit);
+      viewport.removeEventListener('scroll', fit);
+      window.removeEventListener('scroll', fit);
+    };
+  }, [showList]);
+
   const submit = (character?: Character) => {
     const target = character ?? results[active];
     if (!target || disabled) {
@@ -89,8 +145,17 @@ export function GuessInput({ candidates, exclude, onGuess, disabled, helper, aut
     onGuess(target.id);
     setQuery('');
     setOpen(false);
-    if (window.matchMedia('(pointer: fine)').matches) inputRef.current?.focus();
-    else inputRef.current?.blur();
+    if (window.matchMedia('(pointer: fine)').matches) {
+      inputRef.current?.focus();
+      return;
+    }
+    // Touch: drop the keyboard and settle back where the player was, so new clues are in view.
+    const from = liftedFrom.current;
+    liftedFrom.current = null;
+    inputRef.current?.blur();
+    if (from === null) return;
+    window.requestAnimationFrame(() => window.scrollTo({ top: from, behavior: 'smooth' }));
+    window.setTimeout(() => settleAfterGuessing(inputRef.current), 600);
   };
 
   const randomGuess = () => {
@@ -119,11 +184,10 @@ export function GuessInput({ candidates, exclude, onGuess, disabled, helper, aut
     }
   };
 
-  const showList = open && query.trim().length > 0;
   const activeId = showList && results[active] ? `${listId}-${results[active]!.id}` : undefined;
 
   return (
-    <div className={`guess${disabled ? ' guess--disabled' : ''}`}>
+    <div ref={rootRef} className={`guess${disabled ? ' guess--disabled' : ''}`}>
       <form
         className="guess__form"
         onSubmit={(event) => {
@@ -143,7 +207,9 @@ export function GuessInput({ candidates, exclude, onGuess, disabled, helper, aut
             autoCorrect="off"
             autoCapitalize="words"
             spellCheck={false}
-            placeholder={disabled ? 'Waiting for the next soul…' : 'Type a character’s name…'}
+            placeholder={
+              disabled ? 'Waiting for the next soul…' : compact ? 'Guess a soul…' : 'Type a character’s name…'
+            }
             value={query}
             disabled={disabled}
             role="combobox"
@@ -157,8 +223,20 @@ export function GuessInput({ candidates, exclude, onGuess, disabled, helper, aut
               setActive(0);
               setOpen(true);
             }}
-            onFocus={() => setOpen(true)}
-            onBlur={() => window.setTimeout(() => setOpen(false), 120)}
+            onFocus={() => {
+              setOpen(true);
+              liftedFrom.current = liftAboveKeyboard(rootRef.current);
+            }}
+            onBlur={() => {
+              // A tap on a suggestion blurs the field just before its click lands, so wait a beat
+              // before forgetting where to scroll back to.
+              window.setTimeout(() => {
+                setOpen(false);
+                if (document.activeElement === inputRef.current) return;
+                liftedFrom.current = null;
+                settleAfterGuessing(inputRef.current);
+              }, 150);
+            }}
             onKeyDown={onKeyDown}
           />
           {query ? (
@@ -219,7 +297,9 @@ export function GuessInput({ candidates, exclude, onGuess, disabled, helper, aut
                 <Avatar character={character} size={38} />
                 <span className="guess__option-text">
                   <span className="guess__option-name">
-                    <Highlight text={character.name} query={query} />
+                    <span className="guess__option-label">
+                      <Highlight text={character.name} query={query} />
+                    </span>
                     {settings.fillerBadges ? <FillerBadge character={character} /> : null}
                   </span>
                   <span className="guess__option-sub">{character.epithet}</span>

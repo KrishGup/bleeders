@@ -1,34 +1,134 @@
-import { CHARACTERS } from '../data';
-import { MODES } from '../data/taxonomy';
-import type { ModeId } from '../data/types';
+import { useMemo } from 'react';
+import { characterById, CHARACTERS } from '../data';
+import { MODES, modeInfo, type ModeInfo } from '../data/taxonomy';
 import { ACHIEVEMENTS } from '../game/achievements';
 import { useToday } from '../hooks/useToday';
+import { ATTRIBUTES, compareCharacters, type Arrow, type Verdict } from '../lib/compare';
 import { formatDay, puzzleNumber } from '../lib/date';
 import { displayStreak } from '../state/actions';
-import { dailyKey, type GameRecord } from '../state/model';
+import { dailyKey, type GameRecord, type PersistedState } from '../state/model';
+import { dailyStatus } from '../state/status';
 import { useStore } from '../state/store';
 import { ui } from '../state/ui';
 import { Countdown } from '../components/Countdown';
 import { Icon } from '../components/Icon';
 import { Logo } from '../components/Logo';
 
-function statusOf(record: GameRecord | undefined) {
-  if (!record || record.guesses.length === 0) return { label: 'New soul awaits', tone: 'new' as const };
-  if (record.status === 'won') {
-    const n = record.guesses.length;
-    return { label: `Solved in ${n} ${n === 1 ? 'guess' : 'guesses'}`, tone: 'won' as const };
-  }
-  if (record.status === 'lost') return { label: 'Retreated', tone: 'lost' as const };
-  const n = record.guesses.length;
-  return { label: `In progress · ${n} ${n === 1 ? 'guess' : 'guesses'}`, tone: 'playing' as const };
+interface MiniTile {
+  verdict: Verdict;
+  arrow?: Arrow | undefined;
 }
 
-const MODE_ART: Record<ModeId, string> = {
-  classic: 'Gender · Race · Rank · Insignia · Hair · Debut',
-  release: '“Scatter, ████████!”',
-  quote: '“Since when were you under the impression…”',
-  emoji: '🍓 🌙 💀 ❓ ❓',
-};
+/** How a Classic row reads, shown before the first guess of the day. */
+const SAMPLE_ROW: MiniTile[] = [
+  { verdict: 'correct' },
+  { verdict: 'correct' },
+  { verdict: 'partial' },
+  { verdict: 'wrong' },
+  { verdict: 'wrong', arrow: 'up' },
+  { verdict: 'correct' },
+  { verdict: 'wrong', arrow: 'down' },
+];
+
+const MAX_ROWS = 4;
+
+/** Today's Classic guesses as spoiler-free colour rows, oldest first (like a share grid). */
+function boardRows(record: GameRecord | undefined): MiniTile[][] {
+  if (!record || record.guesses.length === 0) return [];
+  const answer = characterById(record.answer);
+  return record.guesses.slice(-MAX_ROWS).map((id) =>
+    compareCharacters(characterById(id), answer).map((cell) => ({
+      verdict: cell.verdict,
+      arrow: cell.arrow,
+    })),
+  );
+}
+
+function ClassicFeature({ state, today }: { state: PersistedState; today: number }) {
+  const info = modeInfo('classic');
+  const record = state.daily[dailyKey('classic', today)];
+  const status = dailyStatus(record);
+  const streak = displayStreak(state, 'classic', today);
+  const rows = useMemo(() => boardRows(record), [record]);
+  const hidden = (record?.guesses.length ?? 0) - rows.length;
+  const cta = status.tone === 'new' ? `Play Bleedle #${puzzleNumber(today)}` : status.action;
+
+  return (
+    <a href="#/classic" className={`feature is-${status.tone}`} data-mode="classic">
+      <span className="feature__head">
+        <span className="feature__kanji kanji" aria-hidden="true">
+          {info.kanji}
+        </span>
+        <span className="feature__titles">
+          <span className="feature__eyebrow">Today’s soul · Bleedle #{puzzleNumber(today)}</span>
+          <span className="feature__title">{info.title}</span>
+          <span className="feature__tagline">{info.tagline}</span>
+        </span>
+        {streak > 0 ? (
+          <span className="chip chip--gold feature__streak" title="Daily streak">
+            <Icon name="flame" size={13} /> {streak} day{streak === 1 ? '' : 's'}
+          </span>
+        ) : null}
+      </span>
+
+      <span className={`feature__board${rows.length ? '' : ' is-sample'}`} aria-hidden="true">
+        {hidden > 0 ? (
+          <span className="feature__more">
+            ⋯ {hidden} earlier {hidden === 1 ? 'guess' : 'guesses'}
+          </span>
+        ) : null}
+        {(rows.length ? rows : [SAMPLE_ROW]).map((row, r) => (
+          <span key={r} className="feature__row">
+            {row.map((tile, i) => (
+              <span key={ATTRIBUTES[i]!.key} className={`feature__tile is-${tile.verdict}`}>
+                {rows.length ? null : <span className="feature__tile-label">{ATTRIBUTES[i]!.label}</span>}
+                {tile.arrow ? <Icon name={tile.arrow} size={15} strokeWidth={3} /> : null}
+              </span>
+            ))}
+          </span>
+        ))}
+      </span>
+
+      <span className="feature__foot">
+        <span className={`feature__status is-${status.tone}`}>
+          {status.tone === 'won' ? <Icon name="check" size={15} strokeWidth={3} /> : null}
+          {status.label}
+        </span>
+        <span className="btn btn--primary btn--lg feature__cta">
+          {cta} <Icon name="next" size={18} />
+        </span>
+      </span>
+    </a>
+  );
+}
+
+function BonusCard({ mode, state, today }: { mode: ModeInfo; state: PersistedState; today: number }) {
+  const status = dailyStatus(state.daily[dailyKey(mode.id, today)]);
+  const streak = displayStreak(state, mode.id, today);
+  return (
+    <a href={`#/${mode.id}`} className={`bonus-card is-${status.tone}`} data-mode={mode.id}>
+      <span className="bonus-card__kanji kanji" aria-hidden="true">
+        {mode.kanji}
+      </span>
+      <span className="bonus-card__text">
+        <span className="bonus-card__title">
+          {mode.title}
+          {streak > 0 ? (
+            <span className="chip chip--gold" title="Daily streak">
+              <Icon name="flame" size={12} /> {streak}
+            </span>
+          ) : null}
+        </span>
+        <span className="bonus-card__tagline">{mode.tagline}</span>
+        <span className={`bonus-card__status is-${status.tone}`}>
+          {status.tone === 'won' ? <Icon name="check" size={13} strokeWidth={3} /> : null}
+          {status.label}
+        </span>
+      </span>
+      <Icon name="next" size={18} className="bonus-card__go" />
+    </a>
+  );
+}
 
 export function HomePage() {
   const today = useToday();
@@ -50,73 +150,49 @@ export function HomePage() {
         </p>
       </section>
 
-      <section className="bankai-meter" aria-label="Today's progress">
-        <div className="bankai-meter__dots">
-          {MODES.map((m) => {
-            const won = state.daily[dailyKey(m.id, today)]?.status === 'won';
-            return (
-              <span
-                key={m.id}
-                className={`bankai-meter__dot${won ? ' is-won' : ''}`}
-                data-mode={m.id}
-                title={m.title}
-              >
-                <span className="kanji">{m.kanji}</span>
-              </span>
-            );
-          })}
-        </div>
-        <p className="bankai-meter__text">
-          {solvedToday === 4 ? (
-            <>
-              <span className="kanji">卍解</span> Bankai achieved — all four souls found today!
-            </>
-          ) : (
-            <>
-              {solvedToday} of 4 souls found today
-              <span className="faint"> · find all four to achieve Bankai</span>
-            </>
-          )}
-        </p>
-      </section>
+      <ClassicFeature state={state} today={today} />
 
-      <section className="mode-grid" aria-label="Game modes">
-        {MODES.map((m) => {
-          const record = state.daily[dailyKey(m.id, today)];
-          const status = statusOf(record);
-          const streak = displayStreak(state, m.id, today);
-          return (
-            <a key={m.id} href={`#/${m.id}`} className={`mode-card is-${status.tone}`} data-mode={m.id}>
-              <span className="mode-card__kanji kanji" aria-hidden="true">
-                {m.kanji}
-              </span>
-              <span className="mode-card__body">
-                <span className="mode-card__top">
-                  <span className="mode-card__title">{m.title}</span>
-                  {streak > 0 ? (
-                    <span className="chip chip--gold" title="Daily streak">
-                      <Icon name="flame" size={13} /> {streak}
-                    </span>
-                  ) : null}
+      <section className="bonus" aria-labelledby="bonus-title">
+        <div className="bonus__head">
+          <h2 id="bonus-title" className="section-title">
+            <span className="kanji">外伝</span> Bonus modes
+          </h2>
+          <p className="bonus__sub">Three quick side puzzles, new every day.</p>
+        </div>
+        <div className="bonus__grid">
+          {MODES.filter((m) => m.id !== 'classic').map((m) => (
+            <BonusCard key={m.id} mode={m} state={state} today={today} />
+          ))}
+        </div>
+        <div className="bankai-meter" aria-label="Today's progress">
+          <div className="bankai-meter__dots">
+            {MODES.map((m) => {
+              const won = state.daily[dailyKey(m.id, today)]?.status === 'won';
+              return (
+                <span
+                  key={m.id}
+                  className={`bankai-meter__dot${won ? ' is-won' : ''}`}
+                  data-mode={m.id}
+                  title={m.title}
+                >
+                  <span className="kanji">{m.kanji}</span>
                 </span>
-                <span className="mode-card__reading">{m.reading}</span>
-                <span className="mode-card__tagline">{m.tagline}</span>
-                <span className="mode-card__art" aria-hidden="true">
-                  {MODE_ART[m.id]}
-                </span>
-                <span className="mode-card__foot">
-                  <span className={`mode-card__status mode-card__status--${status.tone}`}>
-                    {status.tone === 'won' ? <Icon name="check" size={14} strokeWidth={3} /> : null}
-                    {status.label}
-                  </span>
-                  <span className="mode-card__go" aria-hidden="true">
-                    <Icon name="next" size={18} />
-                  </span>
-                </span>
-              </span>
-            </a>
-          );
-        })}
+              );
+            })}
+          </div>
+          <p className="bankai-meter__text">
+            {solvedToday === 4 ? (
+              <>
+                <span className="kanji">卍解</span> Bankai achieved — all four souls found today!
+              </>
+            ) : (
+              <>
+                {solvedToday} of 4 found today
+                <span className="faint"> · clear Classic and every bonus mode for Bankai</span>
+              </>
+            )}
+          </p>
+        </div>
       </section>
 
       <section className="extras" aria-label="More">
@@ -166,14 +242,14 @@ export function HomePage() {
 
       <section className="how" aria-label="How to play">
         <h2 className="section-title">
-          <span className="kanji">道</span> How it works
+          <span className="kanji">道</span> How Classic works
         </h2>
         <ol className="how__steps">
           <li>
             <span className="how__num">1</span>
             <span>
-              <strong>Guess any character.</strong> Every guess reveals clues: matching attributes, clue
-              lines, or a new emoji.
+              <strong>Guess any character.</strong> Each guess fills a row of seven tiles: gender, race,
+              affiliation, rank, insignia, hair and debut arc.
             </span>
           </li>
           <li>
@@ -181,14 +257,14 @@ export function HomePage() {
             <span>
               <strong>Read the colours.</strong> <span className="how__swatch is-correct" /> exact,{' '}
               <span className="how__swatch is-partial" /> partial, <span className="how__swatch is-wrong" />{' '}
-              wrong — arrows point toward the answer.
+              wrong — arrows point toward the answer’s insignia number or debut arc.
             </span>
           </li>
           <li>
             <span className="how__num">3</span>
             <span>
-              <strong>Unlimited guesses.</strong> New souls arrive every midnight, the same for everyone. Keep
-              your streak alive!
+              <strong>Unlimited guesses.</strong> A new soul arrives every midnight, the same for everyone.
+              Keep your streak alive!
             </span>
           </li>
         </ol>

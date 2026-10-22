@@ -53,6 +53,13 @@ const PATHS = {
       <path d="M9 22V12h6v10" />
     </>
   ),
+  menu: (
+    <>
+      <path d="M4 7h16" />
+      <path d="M4 12h16" />
+      <path d="M4 17h10" />
+    </>
+  ),
   back: <path d="m15 18-6-6 6-6" />,
   next: <path d="m9 18 6-6-6-6" />,
   share: (

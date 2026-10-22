@@ -6,11 +6,14 @@
 
 **[▶ Play at krishgup.github.io/bleeders](https://krishgup.github.io/bleeders/)**
 
-**The daily Bleach character guessing game.** Wordle-style daily puzzles in four modes, with over 200 souls from the
-manga, every filler arc, and the films.
+**The daily Bleach character guessing game.** One Wordle-style main puzzle a day, three quick bonus modes, and
+over 200 souls from the manga, every filler arc, and the films.
 
-- **魂 Classic:** deduce the character from seven attributes: gender, race, affiliation, rank, insignia, hair and
-  debut arc. Tiles turn green, yellow or red, and arrows point toward the answer.
+**魂 Classic is the main event:** deduce the character from seven attributes: gender, race, affiliation, rank,
+insignia, hair and debut arc. Tiles turn green, yellow or red, and arrows point toward the answer.
+
+**Bonus modes** for when one soul a day isn't enough:
+
 - **解 Release:** name the wielder of a release command, Bankai, Resurrección, Quincy Schrift, Fullbring or Bount
   doll. Each miss unlocks another clue.
 - **言 Quote:** guess who said a memorable line.
@@ -38,6 +41,9 @@ New puzzles arrive at local midnight and are the same for everyone. Guesses are 
   When two characters share every attribute, the "twin soul" banner lists them.
 - **Polish.** Generated soul crests (original artwork with no copyrighted images), flip animations, reiatsu particle
   effects, synthesised sound effects, and dark and light themes.
+- **Made for phones.** Dialogs become bottom sheets you can swipe away, the guess box lifts above the on-screen
+  keyboard (and drops back after each guess), a menu sheet puts every mode one tap away, and layouts respect notches
+  and the home indicator. Checked from 320px phones up to tablets, in portrait and landscape.
 - **Accessibility.** Colour-blind palette, reduced-motion mode, full keyboard support, an ARIA combobox, and native
   `<dialog>` modals.
 - **Offline-capable PWA.** Installable, with a service worker that caches the app shell. Progress is stored locally,

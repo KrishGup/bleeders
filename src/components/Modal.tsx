@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type PointerEvent, type ReactNode } from 'react';
 import { Icon } from './Icon';
 
 interface ModalProps {
@@ -24,14 +24,20 @@ function lockScroll(): () => void {
   };
 }
 
+/** Phones show dialogs as bottom sheets (see layout.css); they can be swiped down by the header. */
+const SHEET_QUERY = '(max-width: 560px)';
+
 /** Native <dialog>: focus trapping, Esc-to-close and top-layer stacking for free. */
 export function Modal({ open, onClose, title, kanji, size = 'md', children, footer, mode }: ModalProps) {
   const ref = useRef<HTMLDialogElement>(null);
+  const drag = useRef<{ id: number; startY: number; startTime: number; dy: number } | null>(null);
   const titleId = useId();
 
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
+    dialog.style.transform = '';
+    dialog.style.transition = '';
     if (open && !dialog.open) {
       if (typeof dialog.showModal === 'function') dialog.showModal();
       else dialog.setAttribute('open', '');
@@ -40,6 +46,41 @@ export function Modal({ open, onClose, title, kanji, size = 'md', children, foot
     }
     return open ? lockScroll() : undefined;
   }, [open]);
+
+  const onDragStart = (event: PointerEvent<HTMLElement>) => {
+    if (event.pointerType === 'mouse' || !window.matchMedia(SHEET_QUERY).matches) return;
+    if ((event.target as HTMLElement).closest('button, a')) return;
+    drag.current = { id: event.pointerId, startY: event.clientY, startTime: performance.now(), dy: 0 };
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // The pointer may already be gone (a very quick flick); the drag still works without capture.
+    }
+  };
+
+  const onDragMove = (event: PointerEvent<HTMLElement>) => {
+    const state = drag.current;
+    const dialog = ref.current;
+    if (!state || !dialog || event.pointerId !== state.id) return;
+    state.dy = Math.max(0, event.clientY - state.startY);
+    dialog.style.transition = 'none';
+    dialog.style.transform = `translateY(${state.dy}px)`;
+  };
+
+  const onDragEnd = () => {
+    const state = drag.current;
+    const dialog = ref.current;
+    drag.current = null;
+    if (!state || !dialog) return;
+    const speed = state.dy / Math.max(1, performance.now() - state.startTime);
+    dialog.style.transition = 'transform 0.22s cubic-bezier(0.22, 1, 0.36, 1)';
+    if (state.dy > 120 || (state.dy > 36 && speed > 0.5)) {
+      dialog.style.transform = 'translateY(100%)';
+      window.setTimeout(onClose, 180);
+    } else {
+      dialog.style.transform = '';
+    }
+  };
 
   return (
     <dialog
@@ -57,7 +98,13 @@ export function Modal({ open, onClose, title, kanji, size = 'md', children, foot
     >
       {open ? (
         <div className="modal__inner">
-          <header className="modal__head">
+          <header
+            className="modal__head"
+            onPointerDown={onDragStart}
+            onPointerMove={onDragMove}
+            onPointerUp={onDragEnd}
+            onPointerCancel={onDragEnd}
+          >
             {kanji ? <span className="kanji modal__kanji">{kanji}</span> : null}
             <h2 id={titleId} className="modal__title">
               {title}

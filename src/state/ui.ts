@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
 /** Ephemeral UI state: toasts and which global sheet is open. */
-export type Sheet = 'help' | 'stats' | 'settings' | null;
+export type Sheet = 'menu' | 'help' | 'stats' | 'settings' | null;
 
 export interface Toast {
   id: number;

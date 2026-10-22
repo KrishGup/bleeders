@@ -138,6 +138,20 @@ function KindSwitch({ mode, kind }: { mode: ModeId; kind: GameKind }) {
   );
 }
 
+/** Classic is the main event; the other three are labelled as bonus modes. */
+function ModeTitle({ mode, title }: { mode: ModeId; title: string }) {
+  return (
+    <div className="mode-head__title-row">
+      <h1 className="mode-head__title">{title}</h1>
+      {mode === 'classic' ? null : (
+        <span className="chip mode-head__bonus" title="A bonus mode — Classic is the main daily puzzle">
+          Bonus
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function ModePage({ mode, kind, day }: { mode: ModeId; kind: GameKind; day?: number }) {
   const view = useGame(mode, kind, day ?? 0);
   const settings = useSettings();
@@ -198,7 +212,7 @@ export function ModePage({ mode, kind, day }: { mode: ModeId; kind: GameKind; da
             {info0.kanji}
           </span>
           <div className="mode-head__text">
-            <h1 className="mode-head__title">{info0.title}</h1>
+            <ModeTitle mode={mode} title={info0.title} />
             <p className="mode-head__sub">Archive · every past puzzle, ready to replay</p>
           </div>
           <KindSwitch mode={mode} kind={kind} />
@@ -233,7 +247,7 @@ export function ModePage({ mode, kind, day }: { mode: ModeId; kind: GameKind; da
           {info.kanji}
         </span>
         <div className="mode-head__text">
-          <h1 className="mode-head__title">{info.title}</h1>
+          <ModeTitle mode={mode} title={info.title} />
           <p className="mode-head__sub">
             {kind === 'daily'
               ? `Bleedle #${puzzleNumber(view.today)} · ${formatDay(view.today)}`

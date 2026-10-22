@@ -1,10 +1,13 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { CHARACTERS } from '../data';
-import { MODES } from '../data/taxonomy';
+import { MODES, modeInfo, type ModeInfo } from '../data/taxonomy';
 import type { ModeId } from '../data/types';
+import { ACHIEVEMENTS } from '../game/achievements';
 import { RELEASE_STEPS } from '../game/engine';
 import { useToday } from '../hooks/useToday';
 import { ATTRIBUTES } from '../lib/compare';
+import { formatDay, puzzleNumber } from '../lib/date';
+import { sfx } from '../lib/sound';
 import { displayStreak } from '../state/actions';
 import {
   dailyKey,
@@ -15,9 +18,10 @@ import {
   type PersistedState,
   type Settings,
 } from '../state/model';
+import { dailyStatus } from '../state/status';
 import { STORAGE_KEY, store, useStore } from '../state/store';
 import { ui, useUI } from '../state/ui';
-import { Icon } from './Icon';
+import { Icon, type IconName } from './Icon';
 import { ConfirmDialog, Modal } from './Modal';
 import { Segmented } from './Segmented';
 
@@ -159,6 +163,13 @@ function HelpSheet({ initial }: { initial: ModeId }) {
       </div>
       <hr className="divider" />
       <ul className="help__general">
+        <li>
+          <Icon name="sparkles" size={16} />
+          <span>
+            <strong>Classic</strong> is the main daily puzzle. Release, Quote and Emoji are quick bonus modes
+            with their own streaks.
+          </span>
+        </li>
         <li>
           <Icon name="calendar" size={16} />
           <span>New souls arrive every day at your local midnight — the same puzzles for everyone.</span>
@@ -468,12 +479,108 @@ function SettingsSheet() {
 }
 
 /** The three global sheets, opened from the header. */
+// — Menu (phones) ——————————————————————————————————————————————————————————
+
+function MenuSheet({ current }: { current?: ModeId }) {
+  const state = useStore((s) => s);
+  const today = useToday();
+  const target = current ?? 'classic';
+  const collected = Object.keys(state.collection).length;
+  const unlocked = Object.keys(state.achievements).length;
+  const close = () => ui.close();
+
+  const modeLink = (m: ModeInfo, featured: boolean) => {
+    const status = dailyStatus(state.daily[dailyKey(m.id, today)]);
+    const streak = displayStreak(state, m.id, today);
+    return (
+      <a
+        key={m.id}
+        href={`#/${m.id}`}
+        className={`menu-mode${featured ? ' menu-mode--featured' : ''}`}
+        data-mode={m.id}
+        aria-current={current === m.id ? 'page' : undefined}
+        onClick={close}
+      >
+        <span className="menu-mode__kanji kanji" aria-hidden="true">
+          {m.kanji}
+        </span>
+        <span className="menu-mode__text">
+          <span className="menu-mode__title">{m.title}</span>
+          <span className={`menu-mode__status is-${status.tone}`}>
+            {status.tone === 'won' ? <Icon name="check" size={13} strokeWidth={3} /> : null}
+            {status.label}
+          </span>
+        </span>
+        {streak > 0 ? (
+          <span className="chip chip--gold" title="Daily streak">
+            <Icon name="flame" size={13} /> {streak}
+          </span>
+        ) : null}
+        <Icon name="next" size={18} className="menu-mode__go" />
+      </a>
+    );
+  };
+
+  const links: { href: string; icon: IconName; label: string; meta?: string }[] = [
+    { href: '#/', icon: 'home', label: 'Home' },
+    { href: `#/${target}/endless`, icon: 'infinity', label: 'Endless training' },
+    { href: `#/${target}/archive`, icon: 'calendar', label: 'Puzzle archive' },
+    { href: '#/registry', icon: 'book', label: 'Soul Registry', meta: `${collected}/${CHARACTERS.length}` },
+    {
+      href: '#/achievements',
+      icon: 'trophy',
+      label: 'Achievements',
+      meta: `${unlocked}/${ACHIEVEMENTS.length}`,
+    },
+  ];
+
+  return (
+    <nav className="menu" aria-label="Site">
+      <p className="menu__date">
+        <Icon name="calendar" size={14} /> Bleedle #{puzzleNumber(today)} · {formatDay(today)}
+      </p>
+      {modeLink(modeInfo('classic'), true)}
+      <h3 className="menu__heading">
+        <span className="kanji">外伝</span> Bonus modes
+      </h3>
+      <div className="menu__bonus">
+        {MODES.filter((m) => m.id !== 'classic').map((m) => modeLink(m, false))}
+      </div>
+      <h3 className="menu__heading">More</h3>
+      <ul className="menu__links">
+        {links.map((link) => (
+          <li key={link.label}>
+            <a href={link.href} className="menu-link" onClick={close}>
+              <Icon name={link.icon} size={19} />
+              <span className="menu-link__label">{link.label}</span>
+              {link.meta ? <span className="menu-link__meta">{link.meta}</span> : null}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <hr className="divider" />
+      <Switch
+        checked={state.settings.sound}
+        onChange={(sound) => {
+          store.update((s) => ({ ...s, settings: { ...s.settings, sound } }));
+          if (sound) window.setTimeout(() => sfx.tap(), 30);
+        }}
+        label="Sound effects"
+        description="Tile flips, wins and little reishi chimes."
+      />
+    </nav>
+  );
+}
+
 export function Sheets() {
   const sheet = useUI((s) => s.sheet);
   const sheetMode = useUI((s) => s.sheetMode) as ModeId | undefined;
   const initial: ModeId = sheetMode && MODES.some((m) => m.id === sheetMode) ? sheetMode : 'classic';
   return (
     <>
+      <Modal open={sheet === 'menu'} onClose={ui.close} title="Menu" kanji="門" size="md" mode={initial}>
+        <MenuSheet current={sheetMode && MODES.some((m) => m.id === sheetMode) ? initial : undefined} />
+      </Modal>
       <Modal
         open={sheet === 'help'}
         onClose={ui.close}

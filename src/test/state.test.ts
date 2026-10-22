@@ -13,6 +13,7 @@ import {
   startEndless,
 } from '../state/actions';
 import { dailyKey, hydrate, initialState, pruneDaily, type PersistedState } from '../state/model';
+import { dailyStatus } from '../state/status';
 import { mulberry32 } from '../lib/hash';
 
 const NOW = 1_800_000_000_000;
@@ -118,6 +119,25 @@ describe('game state', () => {
     expect(s.perfectDays).toEqual([]);
     // A puzzle finished live shows its live result in the archive.
     expect(getArchiveRecord(s, 'classic', 3, NOW).kind).toBe('daily');
+  });
+
+  it('summarises where today stands for cards and menus', () => {
+    expect(dailyStatus(undefined)).toMatchObject({ tone: 'new', action: 'Play' });
+    let s = initialState();
+    const record = getDailyRecord(s, 'classic', 0, NOW);
+    s = applyGuess(s, record, 'kon', NOW)!.state;
+    expect(dailyStatus(s.daily[dailyKey('classic', 0)])).toEqual({
+      tone: 'playing',
+      label: 'In progress · 1 guess',
+      action: 'Continue',
+    });
+    s = solve(s, 'classic', 0);
+    expect(dailyStatus(s.daily[dailyKey('classic', 0)])).toMatchObject({
+      tone: 'won',
+      label: 'Solved in 2 guesses',
+    });
+    const lost = giveUp(initialState(), getDailyRecord(initialState(), 'quote', 0, NOW), NOW)!;
+    expect(dailyStatus(lost.state.daily[dailyKey('quote', 0)]).tone).toBe('lost');
   });
 
   it('counts shares', () => {

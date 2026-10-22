@@ -37,11 +37,15 @@ export function Backdrop({ kanji, animate }: { kanji?: string; animate: boolean 
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const sameWidth = width === window.innerWidth;
       width = window.innerWidth;
       height = window.innerHeight;
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // Mobile browsers resize the viewport as their toolbars slide in and out while scrolling;
+      // keep the motes where they are unless the width really changed.
+      if (sameWidth && motes.length) return;
       const count = width < 640 ? 26 : 48;
       motes = Array.from({ length: count }, () => ({
         x: Math.random() * width,

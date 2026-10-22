@@ -108,6 +108,8 @@ export function VictoryPanel({ view, onNextEndless }: { view: GameView; onNextEn
       state.daily[dailyKey(m.id, today)]?.status !== 'lost',
   );
   const count = record.guesses.length;
+  const classicOpen = mode !== 'classic' && remaining.some((m) => m.id === 'classic');
+  const bonusLeft = remaining.filter((m) => m.id !== 'classic');
 
   const onShare = async () => {
     const text = buildShareText(record, {
@@ -204,16 +206,29 @@ export function VictoryPanel({ view, onNextEndless }: { view: GameView; onNextEn
       {kind === 'daily' ? (
         <div className="victory__next">
           <Countdown label={`Next ${modeInfo(mode).title} soul in`} />
-          {remaining.length > 0 ? (
+          {classicOpen ? (
+            <a href="#/classic" className="victory__classic" data-mode="classic">
+              <span className="victory__classic-kanji kanji" aria-hidden="true">
+                魂
+              </span>
+              <span className="victory__classic-text">
+                <strong>Today’s Classic is still waiting</strong>
+                <span>The main puzzle — deduce the soul from seven attributes.</span>
+              </span>
+              <Icon name="next" size={20} />
+            </a>
+          ) : null}
+          {bonusLeft.length > 0 ? (
             <div className="victory__modes">
-              <span className="faint">Keep going:</span>
-              {remaining.map((m) => (
+              <span className="faint">Bonus modes:</span>
+              {bonusLeft.map((m) => (
                 <a key={m.id} href={`#/${m.id}`} className="victory__mode-link" data-mode={m.id}>
                   <span className="kanji">{m.kanji}</span> {m.title}
                 </a>
               ))}
             </div>
-          ) : (
+          ) : null}
+          {remaining.length > 0 ? null : (
             <p className="victory__done">
               <span className="kanji">卍解</span> All four of today’s souls are settled. See you tomorrow!
             </p>

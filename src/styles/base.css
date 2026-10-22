@@ -61,6 +61,19 @@ button {
   padding: 0;
 }
 
+/* Touch: no grey flash on tap, and no double-tap-to-zoom delay on controls. */
+a,
+button,
+input,
+select,
+textarea,
+label,
+summary,
+[role='button'] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -209,9 +222,11 @@ p {
     opacity 0.2s ease;
 }
 
-.btn:hover:not(:disabled) {
-  background: var(--surface-3);
-  border-color: var(--border-strong);
+@media (hover: hover) {
+  .btn:hover:not(:disabled) {
+    background: var(--surface-3);
+    border-color: var(--border-strong);
+  }
 }
 
 .btn:active:not(:disabled) {
@@ -230,10 +245,12 @@ p {
   box-shadow: 0 8px 24px -8px var(--mode-accent);
 }
 
-.btn--primary:hover:not(:disabled) {
-  background: var(--mode-accent);
-  filter: brightness(1.08);
-  box-shadow: 0 10px 30px -6px var(--mode-accent);
+@media (hover: hover) {
+  .btn--primary:hover:not(:disabled) {
+    background: var(--mode-accent);
+    filter: brightness(1.08);
+    box-shadow: 0 10px 30px -6px var(--mode-accent);
+  }
 }
 
 .btn--danger {
@@ -242,9 +259,11 @@ p {
   --btn-border: color-mix(in srgb, var(--blood) 40%, transparent);
 }
 
-.btn--danger:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--blood) 14%, transparent);
-  border-color: var(--blood);
+@media (hover: hover) {
+  .btn--danger:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--blood) 14%, transparent);
+    border-color: var(--blood);
+  }
 }
 
 .btn--ghost {
@@ -264,11 +283,18 @@ p {
   font-size: 16px;
 }
 
+@media (pointer: coarse) {
+  .btn--sm {
+    min-height: 40px;
+    padding: 0 15px;
+  }
+}
+
 .icon-btn {
   display: inline-grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   color: var(--text-dim);
   transition:
@@ -277,9 +303,11 @@ p {
     transform 0.15s var(--ease-out);
 }
 
-.icon-btn:hover {
-  background: var(--surface-2);
-  color: var(--text);
+@media (hover: hover) {
+  .icon-btn:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
 }
 
 .icon-btn:active {

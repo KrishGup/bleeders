@@ -53,6 +53,21 @@
   font-size: 14px;
 }
 
+.mode-head__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.mode-head__bonus {
+  height: 22px;
+  padding: 0 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 @media (max-width: 560px) {
   .mode-head {
     grid-template-columns: auto 1fr;
@@ -85,6 +100,7 @@
 .guess {
   position: relative;
   z-index: 20;
+  scroll-margin-top: calc(var(--header-total) + 10px);
 }
 
 .guess__form {
@@ -142,7 +158,7 @@
   flex: 1;
   min-width: 0;
   height: 56px;
-  padding: 0 52px 0 46px;
+  padding: 0 54px 0 46px;
   border: 0;
   background: transparent;
   font-size: 17px;
@@ -157,11 +173,11 @@
 .guess__clear,
 .guess__random {
   position: absolute;
-  right: 8px;
+  right: 6px;
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   color: var(--text-faint);
   transition:
@@ -170,14 +186,20 @@
     transform 0.3s var(--ease-spring);
 }
 
-.guess__clear:hover,
-.guess__random:hover:not(:disabled) {
-  background: var(--surface-2);
-  color: var(--text);
+@media (hover: hover) {
+  .guess__clear:hover,
+  .guess__random:hover:not(:disabled) {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  .guess__random:hover:not(:disabled) {
+    transform: rotate(90deg);
+  }
 }
 
-.guess__random:hover:not(:disabled) {
-  transform: rotate(90deg);
+.guess__random:active:not(:disabled) {
+  transform: rotate(90deg) scale(0.92);
 }
 
 .guess__submit {
@@ -205,14 +227,14 @@
   margin: 0;
   padding: 6px;
   list-style: none;
-  max-height: min(420px, 55vh);
+  /* --list-max is set from the visual viewport so the list stops above the on-screen keyboard. */
+  max-height: var(--list-max, min(420px, 55vh));
   overflow-y: auto;
+  overscroll-behavior: contain;
   border-radius: 18px;
-  background: color-mix(in srgb, var(--bg-elev-2) 96%, transparent);
+  background: var(--bg-elev-2);
   border: 1px solid var(--border-strong);
   box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   animation: pop-in 0.18s var(--ease-out);
 }
 
@@ -227,7 +249,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 10px;
+  min-height: 52px;
+  padding: 7px 10px;
   border-radius: 12px;
   cursor: pointer;
 }
@@ -244,9 +267,15 @@
 
 .guess__option-name {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 2px 8px;
   font-weight: 650;
+}
+
+.guess__option-label {
+  min-width: 0;
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -317,8 +346,10 @@
   animation: glow-pulse 2.4s ease-in-out infinite;
 }
 
-.hint.is-ready .hint__button:hover {
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .hint.is-ready .hint__button:hover {
+    transform: translateY(-1px);
+  }
 }
 
 @keyframes glow-pulse {
@@ -389,7 +420,7 @@
 
 .board__head {
   position: sticky;
-  top: calc(var(--header-h) + 4px);
+  top: calc(var(--header-total) + 4px);
   z-index: 5;
   padding: 6px 0;
   background: linear-gradient(180deg, var(--bg) 70%, transparent);
@@ -579,12 +610,19 @@
   }
 }
 
+/* Narrow desktop tables: keep the longest single words ("DiamondDust") inside their tiles. */
+@media (min-width: 861px) and (max-width: 1000px) {
+  .tile {
+    font-size: 11.5px;
+  }
+}
+
 @media (max-width: 860px) {
   .board__head {
     display: none;
   }
   .board__row {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(12, minmax(0, 1fr));
     padding: 8px;
     border-radius: 18px;
     background: var(--surface);
@@ -605,9 +643,23 @@
     box-shadow: 0 0 24px -10px var(--correct);
   }
   .tile {
+    grid-column: span 3;
+    order: 1;
     min-height: 66px;
-    padding: 18px 4px 6px;
+    padding: 19px 4px 6px;
     font-size: 12px;
+  }
+  .tile[data-attr='affiliation'],
+  .tile[data-attr='rank'],
+  .tile[data-attr='debut'] {
+    grid-column: span 4;
+    order: 2;
+  }
+  .board__row.is-fresh .tile {
+    animation-delay: calc(var(--mi) * 0.16s);
+  }
+  .board__row.is-correct.is-fresh .tile {
+    animation-delay: calc(var(--mi) * 0.16s), calc(1.3s + var(--mi) * 0.05s);
   }
   .tile__label {
     display: block;
@@ -616,11 +668,18 @@
     left: 0;
     right: 0;
     z-index: 1;
-    font-size: 9px;
+    padding: 0 3px;
+    font-size: 10px;
     font-weight: 800;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    opacity: 0.75;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.8;
+  }
+  .tile__values--dense {
+    font-size: 11px;
   }
   .tile__arrow svg {
     width: 48px;
@@ -628,12 +687,18 @@
   }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 359px) {
   .tile {
+    padding-left: 2px;
+    padding-right: 2px;
     font-size: 11px;
   }
   .tile__values--dense {
     font-size: 10px;
+  }
+  .tile__label {
+    font-size: 9.5px;
+    letter-spacing: 0.05em;
   }
 }
 
@@ -766,6 +831,7 @@
 
 .clue-card__title {
   flex: 1;
+  min-width: 0;
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -881,6 +947,17 @@
 @media (max-width: 520px) {
   .clue-card {
     padding: 16px 14px 14px;
+  }
+  .clue-card__head {
+    gap: 10px;
+  }
+  .clue-card__kanji {
+    min-width: 42px;
+    height: 42px;
+    font-size: 18px;
+  }
+  .clue-card__title {
+    font-size: 15.5px;
   }
   .clue-step {
     grid-template-columns: 1fr;
@@ -1027,8 +1104,16 @@
   transition: border-color 0.2s ease;
 }
 
-.yesterday:hover {
-  border-color: var(--border-strong);
+@media (hover: hover) {
+  .yesterday:hover {
+    border-color: var(--border-strong);
+  }
+}
+
+@media (pointer: coarse) {
+  .yesterday {
+    min-height: 40px;
+  }
 }
 
 /* — Victory —————————————————————————————————————————————————————————————— */
@@ -1209,6 +1294,12 @@
   margin: 0;
 }
 
+@media (max-width: 560px) {
+  .victory__facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .victory__facts div,
 .profile__facts div {
   padding: 10px 12px;
@@ -1219,7 +1310,7 @@
 
 .victory__facts dt,
 .profile__facts dt {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1273,13 +1364,78 @@
   transition: transform 0.15s ease;
 }
 
-.victory__mode-link:hover {
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .victory__mode-link:hover {
+    transform: translateY(-1px);
+  }
+}
+
+@media (pointer: coarse) {
+  .victory__mode-link {
+    min-height: 40px;
+  }
 }
 
 .victory__done {
   color: var(--gold);
   font-weight: 700;
+}
+
+.victory__classic {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px 12px 12px;
+  border-radius: var(--radius);
+  color: var(--text);
+  background:
+    radial-gradient(
+      120% 160% at 0% 0%,
+      color-mix(in srgb, var(--mode-accent) 18%, transparent),
+      transparent 60%
+    ),
+    var(--bg-sunken);
+  border: 1px solid color-mix(in srgb, var(--mode-accent) 45%, transparent);
+  box-shadow: 0 10px 30px -18px var(--mode-accent);
+  transition: transform 0.2s var(--ease-out);
+}
+
+.victory__classic > svg {
+  color: var(--mode-accent);
+}
+
+@media (hover: hover) {
+  .victory__classic:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.victory__classic:active {
+  transform: scale(0.985);
+}
+
+.victory__classic-kanji {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 24px;
+  color: var(--mode-accent);
+  background: var(--surface-2);
+  border: 1px solid color-mix(in srgb, var(--mode-accent) 35%, transparent);
+}
+
+.victory__classic-text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.victory__classic-text span {
+  font-size: 13.5px;
+  color: var(--text-dim);
 }
 
 .countdown {
@@ -1334,7 +1490,7 @@
 
 .archive__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(150px, 42%), 1fr));
   gap: 10px;
   margin: 0;
   padding: 0;
@@ -1353,9 +1509,15 @@
     border-color 0.2s ease;
 }
 
-.archive-day:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--mode-accent) 45%, transparent);
+@media (hover: hover) {
+  .archive-day:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--mode-accent) 45%, transparent);
+  }
+}
+
+.archive-day:active {
+  transform: scale(0.97);
 }
 
 .archive-day__num {

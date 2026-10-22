@@ -50,7 +50,8 @@ describe('character roster', () => {
 
   it('keeps hybrid races consistent', () => {
     for (const c of CHARACTERS) {
-      if (c.race.includes('Visored')) expect(c.race, c.id).toEqual(expect.arrayContaining(['Shinigami', 'Hollow']));
+      if (c.race.includes('Visored'))
+        expect(c.race, c.id).toEqual(expect.arrayContaining(['Shinigami', 'Hollow']));
       if (c.race.includes('Arrancar')) expect(c.race, c.id).toContain('Hollow');
       if (c.race.includes('Fullbringer')) expect(c.race, c.id).toContain('Human');
     }

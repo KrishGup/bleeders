@@ -38,7 +38,7 @@ export const GOTEI: Character[] = [
     origin: 'canon',
     tier: 3,
     epithet: 'Lieutenant of the 1st Division',
-    bio: "A refined, tea-loving lieutenant who served the Captain-Commander for two thousand years and hid his own Bankai out of devotion.",
+    bio: 'A refined, tea-loving lieutenant who served the Captain-Commander for two thousand years and hid his own Bankai out of devotion.',
   },
   {
     id: 'genshiro-okikiba',
@@ -55,7 +55,7 @@ export const GOTEI: Character[] = [
     origin: 'canon',
     tier: 4,
     epithet: 'Co-Lieutenant of the 1st Division',
-    bio: "A stern veteran of the 1st Division, promoted from 3rd Seat to serve the new Captain-Commander alongside a bespectacled colleague.",
+    bio: 'A stern veteran of the 1st Division, promoted from 3rd Seat to serve the new Captain-Commander alongside a bespectacled colleague.',
   },
   {
     id: 'nanao-ise',
@@ -403,7 +403,7 @@ export const GOTEI: Character[] = [
     origin: 'canon',
     tier: 1,
     epithet: 'Captain of the 10th Division',
-    bio: "A short-tempered child-prodigy captain who wields the strongest ice-type Zanpakutō in Soul Society and insists you call him by his title.",
+    bio: 'A short-tempered child-prodigy captain who wields the strongest ice-type Zanpakutō in Soul Society and insists you call him by his title.',
   },
   {
     id: 'rangiku-matsumoto',
@@ -472,7 +472,7 @@ export const GOTEI: Character[] = [
     origin: 'canon',
     tier: 1,
     epithet: '3rd Seat of the 11th Division',
-    bio: "A battle-crazed, shaven-headed officer who does a lucky dance before fights and hides his Bankai so he can keep fighting under his captain.",
+    bio: 'A battle-crazed, shaven-headed officer who does a lucky dance before fights and hides his Bankai so he can keep fighting under his captain.',
   },
   {
     id: 'yumichika-ayasegawa',
@@ -541,7 +541,7 @@ export const GOTEI: Character[] = [
     origin: 'canon',
     tier: 2,
     epithet: 'Lieutenant of the 12th Division',
-    bio: "A quiet, obedient lieutenant with a long braid — an artificial soul built by her own captain, who calls her his daughter.",
+    bio: 'A quiet, obedient lieutenant with a long braid — an artificial soul built by her own captain, who calls her his daughter.',
   },
   {
     id: 'akon',
@@ -557,7 +557,7 @@ export const GOTEI: Character[] = [
     origin: 'canon',
     tier: 3,
     epithet: '3rd Seat of the 12th Division',
-    bio: "The horned, chain-smoking 3rd Seat of the research division, who keeps the lab running while his captain experiments.",
+    bio: 'The horned, chain-smoking 3rd Seat of the research division, who keeps the lab running while his captain experiments.',
   },
   {
     id: 'rin-tsubokura',
@@ -626,7 +626,7 @@ export const GOTEI: Character[] = [
     origin: 'canon',
     tier: 2,
     epithet: 'Late Lieutenant of the 13th Division',
-    bio: "A charismatic, beloved lieutenant and mentor to a young noble, whose death at her hands haunted her for decades.",
+    bio: 'A charismatic, beloved lieutenant and mentor to a young noble, whose death at her hands haunted her for decades.',
   },
   {
     id: 'miyako-shiba',

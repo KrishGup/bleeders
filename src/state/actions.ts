@@ -105,7 +105,9 @@ function finish(state: PersistedState, record: GameRecord, won: boolean): Persis
       [record.answer]: {
         first: previous?.first ?? record.endedAt ?? Date.now(),
         count: (previous?.count ?? 0) + 1,
-        modes: previous?.modes.includes(record.mode) ? previous.modes : [...(previous?.modes ?? []), record.mode],
+        modes: previous?.modes.includes(record.mode)
+          ? previous.modes
+          : [...(previous?.modes ?? []), record.mode],
       },
     };
   } else {
@@ -139,7 +141,10 @@ export function applyGuess(
     status: won ? 'won' : 'playing',
     ...(won ? { endedAt: now } : {}),
   };
-  let next: PersistedState = { ...state, counters: { ...state.counters, guesses: state.counters.guesses + 1 } };
+  let next: PersistedState = {
+    ...state,
+    counters: { ...state.counters, guesses: state.counters.guesses + 1 },
+  };
   next = won ? finish(next, updated, true) : putRecord(next, updated);
   const transition = withAchievements(next, now);
   return won ? { ...transition, finished: 'won' } : transition;
@@ -172,7 +177,10 @@ export function startEndless(
 }
 
 export function recordShare(state: PersistedState, now: number): Transition {
-  return withAchievements({ ...state, counters: { ...state.counters, shares: state.counters.shares + 1 } }, now);
+  return withAchievements(
+    { ...state, counters: { ...state.counters, shares: state.counters.shares + 1 } },
+    now,
+  );
 }
 
 /** Streak as the player should see it today (a missed day breaks it). */

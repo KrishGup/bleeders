@@ -256,7 +256,7 @@ export const FILLER: Character[] = [
     origin: 'filler',
     tier: 3,
     epithet: 'Bodyguard of the Kasumiōji Princess',
-    bio: "The tall, composed bodyguard of a noble princess, whose rose-petal blade dulls the edge of any sword it wraps.",
+    bio: 'The tall, composed bodyguard of a noble princess, whose rose-petal blade dulls the edge of any sword it wraps.',
   },
   {
     id: 'gyokaku-kumoi',
@@ -460,7 +460,7 @@ export const FILLER: Character[] = [
     origin: 'filler',
     tier: 3,
     epithet: 'Spirit of the Demon Lantern',
-    bio: "The wild, bearded, battle-loving spirit of a three-section spear — every bit as reckless as its bald master.",
+    bio: 'The wild, bearded, battle-loving spirit of a three-section spear — every bit as reckless as its bald master.',
   },
   {
     id: 'kazeshini-spirit',

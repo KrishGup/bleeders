@@ -209,12 +209,7 @@ export const QUOTES: QuoteEntry[] = [
     'If you ever make Hinamori bleed, I’ll kill you.',
     'A warning to a smiling captain lurking near his childhood friend.',
   ),
-  q(
-    'kon',
-    'substitute',
-    'NEE-SAAAN!',
-    'Leaping, arms wide, at the petite Shinigami he adores.',
-  ),
+  q('kon', 'substitute', 'NEE-SAAAN!', 'Leaping, arms wide, at the petite Shinigami he adores.'),
   q(
     'nelliel-tu-odelschwanck',
     'hueco-mundo',

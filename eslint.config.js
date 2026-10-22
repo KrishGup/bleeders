@@ -27,7 +27,8 @@ export default defineConfig([
   },
   {
     files: ['scripts/**/*.{js,mjs}', 'public/sw.js', '*.config.{js,ts}'],
-    languageOptions: { globals: { ...globals.node, ...globals.serviceworker } },
+    // Scripts drive a headless browser, so page.evaluate() callbacks use DOM globals.
+    languageOptions: { globals: { ...globals.node, ...globals.serviceworker, ...globals.browser } },
   },
   {
     files: ['scripts/**/*.{js,mjs}', 'public/**/*.js'],

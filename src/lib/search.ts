@@ -4,9 +4,9 @@ import type { Character } from '../data/types';
 export function normalize(input: string): string {
   return input
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-    .replace(/[^a-z0-9぀-ヿ㐀-鿿]+/g, ' ')
+    .replace(/[^a-z0-9\u3040-\u30ff\u3400-\u9fff]+/g, ' ')
     .trim();
 }
 
@@ -103,7 +103,11 @@ export interface SearchOptions {
   limit?: number;
 }
 
-export function searchCharacters(index: SearchIndex, rawQuery: string, options: SearchOptions = {}): Character[] {
+export function searchCharacters(
+  index: SearchIndex,
+  rawQuery: string,
+  options: SearchOptions = {},
+): Character[] {
   const query = normalize(rawQuery);
   if (!query) return [];
   const queryKey = phonetic(rawQuery);
@@ -117,7 +121,9 @@ export function searchCharacters(index: SearchIndex, rawQuery: string, options: 
   }
   scored.sort(
     (a, b) =>
-      b.score - a.score || a.character.tier - b.character.tier || a.character.name.localeCompare(b.character.name),
+      b.score - a.score ||
+      a.character.tier - b.character.tier ||
+      a.character.name.localeCompare(b.character.name),
   );
   return scored.slice(0, limit).map((entry) => entry.character);
 }

@@ -18,10 +18,9 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# local env
-.env
-.env.*
-!.env.example
+# local env overrides (.env itself holds public defaults)
+.env.local
+.env.*.local
 
 # playwright artifacts
 test-results/

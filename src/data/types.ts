@@ -151,13 +151,7 @@ export interface Character {
 export type ModeId = 'classic' | 'release' | 'quote' | 'emoji';
 
 export type ReleaseKind =
-  | 'Shikai'
-  | 'Bankai'
-  | 'Resurrección'
-  | 'Schrift'
-  | 'Fullbring'
-  | 'Bount Doll'
-  | 'Power';
+  'Shikai' | 'Bankai' | 'Resurrección' | 'Schrift' | 'Fullbring' | 'Bount Doll' | 'Power';
 
 export interface ReleaseEntry {
   /** Unique id for this clue (a character may have several). */

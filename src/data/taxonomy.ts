@@ -168,7 +168,22 @@ export const AFFILIATION_SHORT: Partial<Record<Affiliation, string>> = {
   'Shihōin Clan': 'Shihōin Clan',
 };
 
-export const KANJI_NUMBERS = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三'];
+export const KANJI_NUMBERS = [
+  '零',
+  '一',
+  '二',
+  '三',
+  '四',
+  '五',
+  '六',
+  '七',
+  '八',
+  '九',
+  '十',
+  '十一',
+  '十二',
+  '十三',
+];
 
 export type InsigniaKind = 'division' | 'espada' | 'schrift';
 
@@ -199,10 +214,16 @@ export function insigniaOf(character: Character): Insignia | null {
   if (division !== null) {
     return division === 0
       ? { kind: 'division', order: 0, label: 'Squad 0', long: 'Royal Guard — Squad Zero' }
-      : { kind: 'division', order: division, label: `Div. ${division}`, long: `${ordinal(division)} Division` };
+      : {
+          kind: 'division',
+          order: division,
+          label: `Div. ${division}`,
+          long: `${ordinal(division)} Division`,
+        };
   }
   if (espada !== undefined) {
-    if (espada > 100) return { kind: 'espada', order: espada, label: `#${espada}`, long: `Privarón Espada #${espada}` };
+    if (espada > 100)
+      return { kind: 'espada', order: espada, label: `#${espada}`, long: `Privarón Espada #${espada}` };
     const serves = rank === 'Fracción' || rank === 'None';
     return {
       kind: 'espada',
@@ -212,7 +233,12 @@ export function insigniaOf(character: Character): Insignia | null {
     };
   }
   if (schrift) {
-    return { kind: 'schrift', order: schrift.charCodeAt(0) - 64, label: `“${schrift}”`, long: `Schrift “${schrift}”` };
+    return {
+      kind: 'schrift',
+      order: schrift.charCodeAt(0) - 64,
+      label: `“${schrift}”`,
+      long: `Schrift “${schrift}”`,
+    };
   }
   return null;
 }
@@ -237,7 +263,7 @@ export const MODES: readonly ModeInfo[] = [
     title: 'Classic',
     kanji: '魂',
     reading: 'tamashii · soul',
-    tagline: 'Deduce the soul from race, rank, division and more.',
+    tagline: 'Deduce the soul from race, rank, insignia and more.',
     accent: 'classic',
   },
   {

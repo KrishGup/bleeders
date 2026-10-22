@@ -3,7 +3,11 @@ import type { ReleaseEntry, ReleaseKind } from './types';
 type Details = Omit<ReleaseEntry, 'id' | 'character' | 'kind' | 'name'>;
 
 function entry(character: string, kind: ReleaseKind, name: string, details: Details): ReleaseEntry {
-  const slug = kind.toLowerCase().replace(/[^a-z]+/g, '-');
+  const slug = kind
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z]+/g, '-');
   return { id: `${character}:${slug}`, character, kind, name, ...details };
 }
 
@@ -25,7 +29,8 @@ export const RELEASES: ReleaseEntry[] = [
   // — Shikai ——————————————————————————————————————————————————————————
   shikai('ichigo-kurosaki', 'Zangetsu', {
     meaning: 'Slaying Moon',
-    ability: 'A guardless, always-released cleaver as tall as its wielder, famous for firing crescents of energy.',
+    ability:
+      'A guardless, always-released cleaver as tall as its wielder, famous for firing crescents of energy.',
     extra: 'Signature move: Getsuga Tenshō',
   }),
   shikai('rukia-kuchiki', 'Sode no Shirayuki', {
@@ -155,7 +160,8 @@ export const RELEASES: ReleaseEntry[] = [
   shikai('shinji-hirako', 'Sakanade', {
     command: 'Collapse',
     meaning: 'Inverted Stroke',
-    ability: 'A ring-hilted blade whose scent reverses its targets’ sense of up, down, left, right — and sight.',
+    ability:
+      'A ring-hilted blade whose scent reverses its targets’ sense of up, down, left, right — and sight.',
     extra: 'Welcome to the inverted world',
   }),
   shikai('rojuro-otoribashi', 'Kinshara', {
@@ -203,7 +209,8 @@ export const RELEASES: ReleaseEntry[] = [
   }),
   shikai('koga-kuchiki', 'Muramasa', {
     command: 'Whisper',
-    ability: "A blade whose spirit whispers to other Zanpakutō, freeing them from — and turning them against — their masters.",
+    ability:
+      'A blade whose spirit whispers to other Zanpakutō, freeing them from — and turning them against — their masters.',
   }),
   // — Bankai ——————————————————————————————————————————————————————————
   bankai('ichigo-kurosaki', 'Tensa Zangetsu', {
@@ -248,7 +255,8 @@ export const RELEASES: ReleaseEntry[] = [
   }),
   bankai('gin-ichimaru', 'Kamishini no Yari', {
     meaning: 'God-Killing Spear',
-    ability: 'Extends to thirteen kilometers at incredible speed — and can leave a cell-dissolving poison behind.',
+    ability:
+      'Extends to thirteen kilometers at incredible speed — and can leave a cell-dissolving poison behind.',
     extra: 'Shikai: Shinsō',
   }),
   bankai('rukia-kuchiki', 'Hakka no Togame', {
@@ -263,7 +271,8 @@ export const RELEASES: ReleaseEntry[] = [
   }),
   bankai('shunsui-kyoraku', 'Katen Kyōkotsu: Karamatsu Shinjū', {
     meaning: 'Flowered Heaven, Crazed Bone: Black Pine Lovers’ Suicide',
-    ability: 'A tragedy in four acts that drags both fighters through its scenes — and the doom it foretells.',
+    ability:
+      'A tragedy in four acts that drags both fighters through its scenes — and the doom it foretells.',
     extra: 'Shikai: Katen Kyōkotsu',
   }),
   bankai('ikkaku-madarame', 'Ryūmon Hōzukimaru', {
@@ -310,12 +319,13 @@ export const RELEASES: ReleaseEntry[] = [
   }),
   resurreccion('szayelaporro-granz', 'Fornicarás', {
     command: 'Sip',
-    ability: "Sprouts tentacle wings that make voodoo dolls of his enemies — down to their organs.",
+    ability: 'Sprouts tentacle wings that make voodoo dolls of his enemies — down to their organs.',
   }),
   resurreccion('coyote-starrk', 'Los Lobos', {
     command: 'Kick about',
     meaning: 'The Wolves',
-    ability: 'Merges with his other half into twin pistols that fire endless Cero and packs of exploding wolves.',
+    ability:
+      'Merges with his other half into twin pistols that fire endless Cero and packs of exploding wolves.',
   }),
   resurreccion('barragan-louisenbairn', 'Arrogante', {
     command: 'Rot',
@@ -415,7 +425,8 @@ export const RELEASES: ReleaseEntry[] = [
   }),
   // — Schrift ——————————————————————————————————————————————————————————
   schrift('yhwach', 'A', 'The Almighty', {
-    ability: 'Sees every possible future and can rewrite it — and can grant or reclaim power from every Quincy.',
+    ability:
+      'Sees every possible future and can rewrite it — and can grant or reclaim power from every Quincy.',
   }),
   schrift('uryu-ishida', 'A', 'The Antithesis', {
     ability: 'Reverses what has happened between two points: wounds become health, health becomes wounds.',
@@ -514,7 +525,8 @@ export const RELEASES: ReleaseEntry[] = [
     ability: 'Boots that grow stronger the dirtier she gets.',
   }),
   fullbring('moe-shishigawara', 'Jackpot Knuckle', {
-    ability: 'A ring-knuckle that grants a random power with each punch — sometimes great, sometimes useless.',
+    ability:
+      'A ring-knuckle that grants a random power with each punch — sometimes great, sometimes useless.',
   }),
   // — Other powers —————————————————————————————————————————————————————
   power('yasutora-sado', 'Brazo Derecha de Gigante', {

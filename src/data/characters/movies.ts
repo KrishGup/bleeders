@@ -98,7 +98,7 @@ export const MOVIES: Character[] = [
     origin: 'movie',
     tier: 3,
     epithet: 'The Chained Sinner',
-    bio: "A chained, bandaged Sinner of Hell who offers to help the hero rescue his little sister — with an agenda all his own.",
+    bio: 'A chained, bandaged Sinner of Hell who offers to help the hero rescue his little sister — with an agenda all his own.',
   },
   {
     id: 'shuren',

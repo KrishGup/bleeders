@@ -15,7 +15,9 @@ export function setSoundEnabled(value: boolean): void {
 function context(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   try {
-    const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const Ctor =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctor) return null;
     ctx ??= new Ctor();
     if (ctx.state === 'suspended') void ctx.resume();

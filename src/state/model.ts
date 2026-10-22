@@ -99,7 +99,15 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 export function emptyStats(): ModeStats {
-  return { played: 0, won: 0, currentStreak: 0, maxStreak: 0, distribution: {}, totalGuesses: 0, hintsUsed: 0 };
+  return {
+    played: 0,
+    won: 0,
+    currentStreak: 0,
+    maxStreak: 0,
+    distribution: {},
+    totalGuesses: 0,
+    hintsUsed: 0,
+  };
 }
 
 export function initialState(): PersistedState {

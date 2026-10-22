@@ -22,10 +22,20 @@ const SCHEDULE_VERSION = 'v1';
  */
 const PINNED: Record<ModeId, Record<number, string>> = {
   classic: { 0: 'renji-abarai', 1: 'grimmjow-jaegerjaquez', 2: 'rangiku-matsumoto', 3: 'shinji-hirako' },
-  release: { 0: 'toshiro-hitsugaya', 1: 'ulquiorra-cifer', 2: 'shuhei-hisagi', 3: 'bambietta-basterbine' },
+  release: {
+    0: 'toshiro-hitsugaya:shikai',
+    1: 'ulquiorra-cifer:resurreccion',
+    2: 'shuhei-hisagi:shikai',
+    3: 'bambietta-basterbine:schrift',
+  },
   quote: { 0: 'sosuke-aizen', 1: 'kenpachi-zaraki', 2: 'orihime-inoue', 3: 'gin-ichimaru' },
   emoji: { 0: 'kon', 1: 'byakuya-kuchiki', 2: 'yachiru-kusajishi', 3: 'mayuri-kurotsuchi' },
 };
+
+/** Pins are a character id, optionally followed by `:entry` to fix the exact clue. */
+function pinnedCharacters(mode: ModeId): Record<number, string> {
+  return Object.fromEntries(Object.entries(PINNED[mode]).map(([day, pin]) => [day, pin.split(':')[0]!]));
+}
 
 type Entry = ReleaseEntry | QuoteEntry | EmojiEntry;
 
@@ -68,7 +78,7 @@ function schedule(mode: ModeId): Schedule<Character> {
       key: (character) => character.id,
       weight: (character) => TIER_WEIGHT[character.tier],
       noRepeatDays: mode === 'classic' ? 150 : 90,
-      pinned: PINNED[mode],
+      pinned: pinnedCharacters(mode),
     });
     scheduleCache.set(mode, s);
   }
@@ -85,6 +95,8 @@ function chooseEntry(mode: Exclude<ModeId, 'classic'>, characterId: string, seed
 export function dailyPuzzle(mode: ModeId, day: number): Puzzle {
   const character = schedule(mode).pick(day);
   if (mode === 'classic') return { answer: character.id };
+  const pin = PINNED[mode][day];
+  if (pin?.includes(':') && entryIndex.has(pin)) return { answer: character.id, clue: pin };
   const entry = chooseEntry(mode, character.id, `bleedle:${mode}:entry:${day}`);
   return { answer: character.id, clue: entry.id };
 }
@@ -187,7 +199,12 @@ export function releaseClues(entry: ReleaseEntry): Clue[] {
     return steps.map((clue, i) => ({ ...clue, at: RELEASE_STEPS[i]! }));
   }
   const opener: Clue = entry.command
-    ? { at: 0, label: 'Release command', text: `“${entry.command}, ${maskName(entry.name)}!”`, tone: 'command' }
+    ? {
+        at: 0,
+        label: 'Release command',
+        text: `“${entry.command}, ${maskName(entry.name)}!”`,
+        tone: 'command',
+      }
     : entry.meaning
       ? { at: 0, label: 'Meaning', text: `“${entry.meaning}”`, tone: 'command' }
       : { at: 0, label: 'Power', text: entry.ability, tone: 'plain' };
@@ -210,7 +227,12 @@ export function quoteClues(entry: QuoteEntry, character: Character): Clue[] {
 
 export function emojiClues(entry: EmojiEntry, character: Character): Clue[] {
   return [
-    ...entry.emoji.map((emoji, i) => ({ at: i, label: `Emoji ${i + 1}`, text: emoji, tone: 'emoji' as const })),
+    ...entry.emoji.map((emoji, i) => ({
+      at: i,
+      label: `Emoji ${i + 1}`,
+      text: emoji,
+      tone: 'emoji' as const,
+    })),
     { at: 7, label: 'Debut', text: arcInfo(character.debut).name },
     { at: 10, label: 'Initials', text: initials(character.name), tone: 'name' },
   ];

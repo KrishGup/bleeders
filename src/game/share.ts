@@ -60,6 +60,8 @@ export function buildShareText(record: GameRecord, options: ShareOptions): strin
     .join(' ');
 
   const body =
-    record.mode === 'classic' ? classicGrid(record, options.colorblind) : [streakLine(record, options.colorblind)];
+    record.mode === 'classic'
+      ? classicGrid(record, options.colorblind)
+      : [streakLine(record, options.colorblind)];
   return [title, extras ? `${result} ${extras}` : result, ...body, options.url].join('\n');
 }

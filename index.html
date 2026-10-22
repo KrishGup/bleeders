@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Bleedle — the daily Bleach character guessing game</title>
+    <meta
+      name="description"
+      content="Guess the Bleach character of the day. Four daily modes — Classic, Release, Quote and Emoji — over 200 souls from the manga, filler arcs and films."
+    />
+    <meta name="theme-color" content="#08080c" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="application-name" content="Bleedle" />
+    <meta name="apple-mobile-web-app-title" content="Bleedle" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Bleedle — the daily Bleach character guessing game" />
+    <meta
+      property="og:description"
+      content="Four daily modes. 200+ souls, filler included. Can you find today's character?"
+    />
+    <meta property="og:url" content="%VITE_SITE_URL%" />
+    <meta property="og:image" content="%VITE_SITE_URL%og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <link rel="canonical" href="%VITE_SITE_URL%" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="./icons/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <script>
+      // Apply the saved theme before first paint to avoid a flash.
+      try {
+        var saved = JSON.parse(localStorage.getItem('bleedle:v1') || 'null');
+        var theme = saved && saved.settings && saved.settings.theme;
+        if (!theme || theme === 'system') {
+          theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        }
+        document.documentElement.dataset.theme = theme;
+        if (saved && saved.settings && saved.settings.colors) {
+          document.documentElement.dataset.colors = saved.settings.colors;
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <noscript>Bleedle needs JavaScript to summon its souls.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

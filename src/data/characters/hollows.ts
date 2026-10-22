@@ -22,7 +22,7 @@ export const HOLLOWS: Character[] = [
     tier: 1,
     espada: 1,
     epithet: 'Primera Espada · Aspect of Death: Solitude',
-    bio: "A lazy, perpetually sleepy gunslinger whose overwhelming power killed everyone near him — so he split his soul in two just to have company.",
+    bio: 'A lazy, perpetually sleepy gunslinger whose overwhelming power killed everyone near him — so he split his soul in two just to have company.',
   },
   {
     id: 'lilynette-gingerbuck',
@@ -769,7 +769,7 @@ export const HOLLOWS: Character[] = [
     origin: 'canon',
     tier: 4,
     epithet: 'The Murderer',
-    bio: "A sadistic Hollow — a serial killer in life — who torments the ghost of a little boy trapped inside a talking parakeet.",
+    bio: 'A sadistic Hollow — a serial killer in life — who torments the ghost of a little boy trapped inside a talking parakeet.',
   },
   {
     id: 'fishbone-d',

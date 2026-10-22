@@ -218,7 +218,7 @@ export const QUINCY: Character[] = [
     tier: 2,
     schrift: 'H',
     epithet: '“H” — The Heat',
-    bio: "A hot-headed Sternritter with a flaming mohawk, who once swore to overthrow the Emperor alongside his childhood friend.",
+    bio: 'A hot-headed Sternritter with a flaming mohawk, who once swore to overthrow the Emperor alongside his childhood friend.',
   },
   {
     id: 'as-nodt',

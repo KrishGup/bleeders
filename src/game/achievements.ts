@@ -216,10 +216,7 @@ export const ACHIEVEMENTS: readonly Achievement[] = [
     kanji: '霊王',
     description: 'Unlock every other achievement.',
     progress: (s) =>
-      count(
-        Object.keys(s.achievements).filter((id) => id !== 'soul-king').length,
-        ACHIEVEMENTS.length - 1,
-      ),
+      count(Object.keys(s.achievements).filter((id) => id !== 'soul-king').length, ACHIEVEMENTS.length - 1),
   },
 ];
 

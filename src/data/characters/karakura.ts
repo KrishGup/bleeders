@@ -85,7 +85,7 @@ export const KARAKURA: Character[] = [
     origin: 'canon',
     tier: 1,
     epithet: 'Former Captain of the 10th Division',
-    bio: "The goofy, ambush-loving clinic doctor of Karakura Town — secretly a former 10th Division captain of the Shiba clan who gave up his powers for love.",
+    bio: 'The goofy, ambush-loving clinic doctor of Karakura Town — secretly a former 10th Division captain of the Shiba clan who gave up his powers for love.',
   },
   {
     id: 'karin-kurosaki',
@@ -153,7 +153,7 @@ export const KARAKURA: Character[] = [
     origin: 'canon',
     tier: 2,
     epithet: 'Karate Champion of Karakura',
-    bio: "A fierce, nationally ranked karate fighter, childhood friend of the hero and self-appointed bodyguard of her best friend Orihime.",
+    bio: 'A fierce, nationally ranked karate fighter, childhood friend of the hero and self-appointed bodyguard of her best friend Orihime.',
   },
   {
     id: 'keigo-asano',
@@ -221,7 +221,7 @@ export const KARAKURA: Character[] = [
     origin: 'canon',
     tier: 4,
     epithet: 'Member of the Handicrafts Club',
-    bio: "A timid, sweet classmate who loves cute things and sews alongside Orihime and Uryū in the handicrafts club.",
+    bio: 'A timid, sweet classmate who loves cute things and sews alongside Orihime and Uryū in the handicrafts club.',
   },
   {
     id: 'ryo-kunieda',
@@ -322,7 +322,7 @@ export const KARAKURA: Character[] = [
     origin: 'canon',
     tier: 4,
     epithet: 'Abuelo',
-    bio: "A gentle old man in Mexico who taught his brawling grandson to use his strength only to protect others, and gave him a coin to remember it by.",
+    bio: 'A gentle old man in Mexico who taught his brawling grandson to use his strength only to protect others, and gave him a coin to remember it by.',
   },
   {
     id: 'kisuke-urahara',
@@ -356,7 +356,7 @@ export const KARAKURA: Character[] = [
     origin: 'canon',
     tier: 2,
     epithet: 'Former Grand Kidō Chief',
-    bio: "The burly, apron-wearing shop assistant with braided hair and a mustache — formerly Captain of the Kidō Corps and a master of forbidden spells.",
+    bio: 'The burly, apron-wearing shop assistant with braided hair and a mustache — formerly Captain of the Kidō Corps and a master of forbidden spells.',
   },
   {
     id: 'jinta-hanakari',

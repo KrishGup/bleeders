@@ -6,7 +6,7 @@ import { ACHIEVEMENTS } from '../game/achievements';
 import { RELEASE_STEPS } from '../game/engine';
 import { useToday } from '../hooks/useToday';
 import { ATTRIBUTES } from '../lib/compare';
-import { formatDay, puzzleNumber } from '../lib/date';
+import { formatDay, puzzleNumber, resetTimeLabel } from '../lib/date';
 import { sfx } from '../lib/sound';
 import { displayStreak } from '../state/actions';
 import {
@@ -172,7 +172,10 @@ function HelpSheet({ initial }: { initial: ModeId }) {
         </li>
         <li>
           <Icon name="calendar" size={16} />
-          <span>New souls arrive every day at your local midnight — the same puzzles for everyone.</span>
+          <span>
+            New souls go live for everyone at the same moment: 11 PM US Eastern ({resetTimeLabel()} your
+            time).
+          </span>
         </li>
         <li>
           <Icon name="infinity" size={16} />

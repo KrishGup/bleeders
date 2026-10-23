@@ -263,8 +263,8 @@ export function HomePage() {
           <li>
             <span className="how__num">3</span>
             <span>
-              <strong>Unlimited guesses.</strong> A new soul arrives every midnight, the same for everyone.
-              Keep your streak alive!
+              <strong>Unlimited guesses.</strong> A new soul goes live every night at 11 PM Eastern, the same
+              for everyone. Keep your streak alive!
             </span>
           </li>
         </ol>

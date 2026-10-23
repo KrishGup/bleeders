@@ -19,7 +19,7 @@ insignia, hair and debut arc. Tiles turn green, yellow or red, and arrows point 
 - **言 Quote:** guess who said a memorable line.
 - **絵 Emoji:** five emoji describe a character. One is shown at the start, and each miss reveals another.
 
-New puzzles arrive at local midnight and are the same for everyone. Guesses are unlimited.
+Everyone gets the next puzzle at the same moment: 11 PM US Eastern every night. Guesses are unlimited.
 
 ## Features
 
@@ -62,6 +62,10 @@ Each mode uses **weighted rendezvous hashing** ([`src/lib/daily.ts`](src/lib/dai
 Rendezvous hashing has a useful property: **adding a character only changes the days that character wins.** Every
 other past and future puzzle keeps its answer. Once a player starts a daily, its answer is also saved with their
 game, so it never changes under them.
+
+**When the day changes:** a puzzle day runs from 11 PM US Eastern to 11 PM the next night, the same moment for every
+player worldwide ([`src/lib/date.ts`](src/lib/date.ts)). It follows daylight saving, so the reset is 03:00 UTC in
+summer and 04:00 UTC in winter.
 
 ## Development
 

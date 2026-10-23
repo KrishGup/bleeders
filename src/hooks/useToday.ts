@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { dayIndexFor, msUntilNextDay } from '../lib/date';
 
-/** The current puzzle day; flips automatically at local midnight. */
+/** The current puzzle day; flips automatically at the nightly reset (11 PM US Eastern). */
 export function useToday(): number {
   const [today, setToday] = useState(() => dayIndexFor());
 

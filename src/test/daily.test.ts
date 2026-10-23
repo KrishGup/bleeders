@@ -2,7 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { CHARACTERS } from '../data';
 import { dailyPuzzle, modeRoster, releaseEntry } from '../game/engine';
 import { createSchedule } from '../lib/daily';
-import { dayIndexFor, dayToDate, formatCountdown, msUntilNextDay, puzzleNumber } from '../lib/date';
+import {
+  dayIndexFor,
+  dayToDate,
+  formatCountdown,
+  msUntilNextDay,
+  puzzleNumber,
+  puzzleStart,
+  RESET_ZONE,
+} from '../lib/date';
 import { cyrb53, mulberry32, unitHash } from '../lib/hash';
 
 const items = Array.from({ length: 60 }, (_, i) => ({ id: `soul-${i}`, weight: i < 10 ? 3 : 1 }));
@@ -33,22 +41,40 @@ describe('hashing', () => {
 });
 
 describe('dates', () => {
-  it('counts days from the launch date in local time', () => {
-    expect(dayIndexFor(new Date(2026, 9, 22, 0, 1))).toBe(0);
-    expect(dayIndexFor(new Date(2026, 9, 22, 23, 59))).toBe(0);
-    expect(dayIndexFor(new Date(2026, 9, 23, 0, 0))).toBe(1);
-    expect(dayIndexFor(new Date(2027, 9, 22, 12))).toBe(365);
-    expect(dayIndexFor(new Date(2020, 0, 1))).toBe(0);
+  const at = (iso: string) => new Date(iso);
+
+  it('rolls over for everyone at 11 PM Eastern', () => {
+    expect(dayIndexFor(at('2026-10-22T03:00:00Z'))).toBe(0); // 11 PM EDT on the 21st: #1 goes live
+    expect(dayIndexFor(at('2026-10-22T18:00:00Z'))).toBe(0);
+    expect(dayIndexFor(at('2026-10-24T02:59:59Z'))).toBe(1); // 10:59 PM EDT on the 23rd
+    expect(dayIndexFor(at('2026-10-24T03:00:00Z'))).toBe(2); // 11 PM EDT: #3
+    // Once clocks fall back, 11 PM Eastern is 04:00 UTC.
+    expect(dayIndexFor(at('2026-11-02T03:59:59Z'))).toBe(10);
+    expect(dayIndexFor(at('2026-11-02T04:00:00Z'))).toBe(11);
+    expect(dayIndexFor(at('2027-10-22T12:00:00Z'))).toBe(365);
+    expect(dayIndexFor(at('2020-01-01T00:00:00Z'))).toBe(0);
     expect(puzzleNumber(0)).toBe(1);
   });
 
-  it('survives daylight-saving transitions', () => {
-    // Every consecutive local midnight must map to consecutive indexes.
-    let previous = dayIndexFor(new Date(2027, 0, 1));
-    for (let d = 2; d <= 365; d++) {
-      const index = dayIndexFor(new Date(2027, 0, d));
-      expect(index - previous).toBe(1);
-      previous = index;
+  it('started Bleedle #2 early, at launch', () => {
+    expect(dayIndexFor(at('2026-10-23T00:29:59Z'))).toBe(0);
+    expect(dayIndexFor(at('2026-10-23T00:30:00Z'))).toBe(1);
+    expect(dayIndexFor(at('2026-10-23T02:00:00Z'))).toBe(1);
+    expect(new Date(puzzleStart(1)).toISOString()).toBe('2026-10-23T00:30:00.000Z');
+  });
+
+  it('starts every puzzle at 11 PM on the Eastern clock, through daylight saving', () => {
+    const hourIn = (ms: number) =>
+      new Intl.DateTimeFormat('en-US', { timeZone: RESET_ZONE, hour: 'numeric', hourCycle: 'h23' }).format(
+        ms,
+      );
+    for (let day = 2; day < 420; day++) {
+      const start = puzzleStart(day);
+      expect(hourIn(start), `day ${day}`).toBe('23');
+      expect(dayIndexFor(new Date(start))).toBe(day);
+      expect(dayIndexFor(new Date(start - 1))).toBe(day - 1);
+      // 24 hours apart, or 23/25 around a clock change (#2's early start aside).
+      if (day > 2) expect([23, 24, 25]).toContain((start - puzzleStart(day - 1)) / 3_600_000);
     }
   });
 
@@ -57,10 +83,12 @@ describe('dates', () => {
     expect([date.getFullYear(), date.getMonth(), date.getDate()]).toEqual([2026, 10, 1]);
   });
 
-  it('formats the countdown', () => {
+  it('counts down to the next reset', () => {
     expect(formatCountdown(3_723_000)).toBe('01:02:03');
     expect(formatCountdown(-5)).toBe('00:00:00');
-    expect(msUntilNextDay(new Date(2026, 9, 22, 23, 59, 0))).toBe(60_000);
+    expect(msUntilNextDay(at('2026-10-24T02:59:00Z'))).toBe(60_000);
+    expect(msUntilNextDay(at('2026-10-23T00:00:00Z'))).toBe(30 * 60_000);
+    expect(formatCountdown(msUntilNextDay(at('2026-10-23T00:45:00Z')))).toBe('26:15:00');
   });
 });
 
